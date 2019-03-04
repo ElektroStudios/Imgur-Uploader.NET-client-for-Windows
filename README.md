@@ -1,6 +1,6 @@
 # Imgur Uploader.NET
 
-**Imgur Uploader.NET** is an application that uploads images to <a href="http://imgur.com" target="_blank">http://imgur.com</a> with ease.
+**Imgur Uploader.NET** is a desktop application that uploads images to <a href="http://imgur.com" target="_blank">http://imgur.com</a> with ease.
 
 To use this program you need a Imgur's API key. To request your API key follow the instructions on this link:
 
