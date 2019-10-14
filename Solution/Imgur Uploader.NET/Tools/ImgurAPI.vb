@@ -1,12 +1,4 @@
-﻿' ***********************************************************************
-' Author           : Elektro
-' Last Modified On : 19-January-2015
-' ***********************************************************************
-' <copyright file="ImgurAPI.vb" company="Elektro Studios">
-'     Copyright (c) Elektro Studios. All rights reserved.
-' </copyright>
-' ***********************************************************************
-
+﻿
 #Region " Option Statements "
 
 Option Strict On
@@ -397,11 +389,12 @@ Namespace Tools
         ''' <summary>
         ''' Uploads asynchronous an image  anonymously to imgur.
         ''' </summary>
-        ''' </summary>
         ''' <param name="img">
         ''' Indicates a filename that points to an existing image.
         ''' </param>
-        ''' <returns>An instance of the imgurImage Class that contains the url and it's thumbnail urls.</returns>
+        ''' <returns>
+        ''' An instance of the imgurImage Class that contains the url and it's thumbnail urls.
+        ''' </returns>
         Public Function UploadImageAsync(ByVal img As String) As ImgurImage
 
             cts = New CancellationTokenSource

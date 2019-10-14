@@ -121,7 +121,7 @@
     <value>12, 17</value>
   </metadata>
   <data name="OpenFileDialog_BrowseImage.Filter" xml:space="preserve">
-    <value>All supported formats|*.BMP;*.JPG;*.JPEG;*.GIF;*.PNG;*.APNG;*.TIFF;*.PDF;*.XCF|Bitmap Image|*.BMP|Jpeg Image|*.JPG;*.JPEG|Animated Gif|*.GIF|PNG Image|*.PNG|APNG Image|*.APNG|TIFF Image|*.TIFF|PDF File|*.PDF|XCF Image|*.XCF</value>
+    <value>All supported formats|*.BMP;*.JPG;*.JPEG;*.GIF;*.PNG;*.APNG;*.TIFF;*.PDF;*.XCF|Bitmap Images|*.BMP|JPEG Images|*.JPG;*.JPEG|GIF Images|*.GIF|PNG Images|*.PNG|APNG Images|*.APNG|TIFF Images|*.TIFF|PDF Files|*.PDF|XCF Images|*.XCF</value>
   </data>
   <metadata name="StatusStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>226, 17</value>

@@ -1,12 +1,4 @@
-﻿' ***********************************************************************
-' Author           : Elektro
-' Last Modified On : 06-21-2014
-' ***********************************************************************
-' <copyright file="INI File Manager.vb" company="Elektro Studios">
-'     Copyright (c) Elektro Studios. All rights reserved.
-' </copyright>
-' ***********************************************************************
-
+﻿
 #Region " Option Statements "
 
 Option Strict On

@@ -1,57 +1,12 @@
 ﻿Imports System.IO
 Imports System.Drawing.Imaging
 
-' ***********************************************************************
-' Author   : Elektro
-' Modified : 19-January-2015
-' ***********************************************************************
-' <copyright file="ImageTools.vb" company="Elektro Studios">
-'     Copyright (c) Elektro Studios. All rights reserved.
-' </copyright>
-' ***********************************************************************
-
 Namespace Tools
 
     ''' <summary>
     ''' Class ImageTools.
     ''' </summary>
     Public NotInheritable Class ImageTools
-
-        ' Resize Image
-        ' By Elektro
-        '
-        ' Usage Examples:
-        '
-        ' PictureBox1.BackgroundImage = ResizeImage(System.Drawing.Image.FromFile("C:\Image.png"), Width:=256,  Height:=256)
-        ' PictureBox1.BackgroundImage = ResizeImage(System.Drawing.ImageBitmap.FromFile("C:\Image.png"), Width:=256,  Height:=256)
-        ' PictureBox1.BackgroundImage = ResizeImage(System.Drawing.Image.FromFile("C:\Image.png"), Percent:=50.0R)
-        ' PictureBox1.BackgroundImage = ResizeImage(System.Drawing.Bitmap.FromFile("C:\Image.png"), Percent:=50.0R)
-
-        ''' <summary>
-        ''' Resizes an image.
-        ''' </summary>
-        ''' <param name="Bitmap">Indicates the image.</param>
-        ''' <param name="Width">Indicates the new width.</param>
-        ''' <param name="Height">Indicates the new height.</param>
-        ''' <returns>Bitmap.</returns>
-        Public Shared Function ResizeImage(ByVal bitmap As Drawing.Bitmap,
-                                    ByVal width As Integer,
-                                    ByVal height As Integer,
-                                    Optional ByVal quality As Drawing2D.InterpolationMode =
-                                                              Drawing2D.InterpolationMode.HighQualityBicubic,
-                                    Optional ByVal pixelFormat As Imaging.PixelFormat =
-                                                                  Imaging.PixelFormat.Format24bppRgb) As Drawing.Bitmap
-
-            Dim newBitmap As New Bitmap(width, height, pixelFormat)
-
-            Using g As Graphics = Graphics.FromImage(newBitmap)
-                g.InterpolationMode = quality
-                g.DrawImage(bitmap, 0I, 0I, newBitmap.Width, newBitmap.Height)
-            End Using
-
-            Return newBitmap
-
-        End Function
 
         ''' <summary>
         ''' Resizes an image by a percentage.
@@ -77,44 +32,6 @@ Namespace Tools
             End Using
 
             Return newBitmap
-
-        End Function
-
-        ''' <summary>
-        ''' Resizes an image.
-        ''' </summary>
-        ''' <param name="Image">Indicates the image to resize.</param>
-        ''' <param name="Width">Indicates the new width.</param>
-        ''' <param name="Height">Indicates the new height.</param>
-        ''' <returns>Bitmap.</returns>
-        Public Shared Function ResizeImage(ByVal image As Drawing.Image,
-                                    ByVal width As Integer,
-                                    ByVal height As Integer,
-                                    Optional ByVal quality As Drawing2D.InterpolationMode =
-                                                              Drawing2D.InterpolationMode.HighQualityBicubic,
-                                    Optional ByVal pixelFormat As Imaging.PixelFormat =
-                                                                  Imaging.PixelFormat.Format24bppRgb) As Drawing.Image
-
-            Return DirectCast(ResizeImage(DirectCast(image, Drawing.Bitmap), width, height, quality, pixelFormat), 
-                              Drawing.Image)
-
-        End Function
-
-        ''' <summary>
-        ''' Resize an image by the specified percentage.
-        ''' </summary>
-        ''' <param name="Image">Indicates the image.</param>
-        ''' <param name="Percent">Indicates the percentage.</param>
-        ''' <returns>Bitmap.</returns>
-        Public Shared Function ResizeImage(ByVal image As Drawing.Image,
-                                    ByVal percent As Double,
-                                    Optional ByVal quality As Drawing2D.InterpolationMode =
-                                                              Drawing2D.InterpolationMode.HighQualityBicubic,
-                                    Optional ByVal pixelFormat As Imaging.PixelFormat =
-                                                                  Imaging.PixelFormat.Format24bppRgb) As Drawing.Image
-
-            Return DirectCast(ResizeImage(DirectCast(image, Drawing.Bitmap), percent, quality, pixelFormat), 
-                              Drawing.Image)
 
         End Function
 
@@ -168,6 +85,71 @@ Namespace Tools
             bmp.Dispose()
 
         End Sub
+
+        ''' ----------------------------------------------------------------------------------------------------
+        ''' <summary>
+        ''' Resizes an <see cref="Drawing.Image"/>.
+        ''' </summary>
+        ''' ----------------------------------------------------------------------------------------------------
+        ''' <param name="size">
+        ''' The new size.
+        ''' </param>
+        ''' 
+        ''' <param name="keepAspectRatio">
+        ''' <see langword="True"/> to preserve original image's aspect ratio; <see langword="False"/> otherwise.
+        ''' </param>
+        ''' ----------------------------------------------------------------------------------------------------
+        ''' <returns>
+        ''' The resized <see cref="Drawing.Image"/>.
+        ''' </returns>
+        ''' ----------------------------------------------------------------------------------------------------
+        ''' <exception cref="ArgumentException">
+        ''' Value greater than zero is required.;width
+        ''' or
+        ''' Value greater than zero is required.;height
+        ''' </exception>
+        ''' ----------------------------------------------------------------------------------------------------
+        <DebuggerStepThrough>
+        Public Shared Function Resize(img As Drawing.Image,
+                               size As Drawing.Size,
+                               keepAspectRatio As Boolean) As Drawing.Image
+
+            If (size.Width <= 0) Then
+                Throw New ArgumentException(message:="Width bigger than zero is reqired.", paramName:=NameOf(size))
+
+            ElseIf (size.Height <= 0) Then
+                Throw New ArgumentException(message:="Height bigger than zero is reqired.", paramName:=NameOf(size))
+
+            Else
+                Dim bmp As New Drawing.Bitmap(size.Width, size.Height, img.PixelFormat)
+                Using g As Drawing.Graphics = System.Drawing.Graphics.FromImage(bmp)
+                    If keepAspectRatio Then
+                        ' Compute aspect ratio (our scaling factor)
+                        Dim scaleHeight As Single = CSng(size.Height) / CSng(img.Height)
+                        Dim scaleWidth As Single = CSng(size.Width) / CSng(img.Width)
+                        Dim scale As Single = Math.Min(scaleHeight, scaleWidth)
+
+                        ' Center image.
+                        Dim shiftX As Single = 0, shiftY As Single = 0
+                        If (size.Width > (img.Width * scale)) Then
+                            shiftX = CSng(size.Width - (img.Width * scale)) / 2
+                        End If
+                        If (size.Height > (img.Height * scale)) Then
+                            shiftY = CSng(size.Height - (img.Height * scale)) / 2
+                        End If
+
+                        g.DrawImage(img, New System.Drawing.RectangleF(shiftX, shiftY, img.Width * scale, img.Height * scale))
+                    Else
+                        g.DrawImage(img, New System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height))
+
+                    End If
+                End Using
+
+                Return bmp
+
+            End If
+
+        End Function
 
     End Class
 

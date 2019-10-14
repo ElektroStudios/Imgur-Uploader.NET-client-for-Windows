@@ -1,12 +1,4 @@
-﻿' ***********************************************************************
-' Author   : Elektro
-' Modified : 19-January-2014
-' ***********************************************************************
-' <copyright file="Main.vb" company="Elektro Studios">
-'     Copyright (c) Elektro Studios. All rights reserved.
-' </copyright>
-' ***********************************************************************
-
+﻿
 #Region " Option Statements "
 
 Option Strict On
@@ -512,8 +504,10 @@ Namespace UserInterface
                                       ByVal width As Integer,
                                       ByVal height As Integer) As Image
 
+
             Using bmp As New Bitmap(filePath)
-                Return bmp.GetThumbnailImage(width, height, Nothing, IntPtr.Zero)
+                Return ImageTools.Resize(bmp, New Size(width, height), keepAspectRatio:=True)
+                ' Return bmp.GetThumbnailImage(width, height, Nothing, IntPtr.Zero)
             End Using
 
         End Function
@@ -691,13 +685,15 @@ Namespace UserInterface
 
                 End With '/ urls
 
-                Me.ToolStripStatusLabel_File.Text = String.Format("Completed: '{0}'",
+                Me.ToolStripStatusLabel_File.Text = String.Format("Uploaded: '{0}'",
                                                                   Path.GetFileName(filename))
+                Me.ToolStripStatusLabel_File.ForeColor = Color.Gainsboro
 
             Else
 
-                Me.ToolStripStatusLabel_File.Text = String.Format("Error !!: '{0}'",
+                Me.ToolStripStatusLabel_File.Text = String.Format("Error: '{0}'",
                                                                   Path.GetFileName(filename))
+                Me.ToolStripStatusLabel_File.ForeColor = Color.IndianRed
 
             End If '/ urls IsNot Nothing
 
@@ -732,9 +728,6 @@ Namespace UserInterface
 
 #End Region
 
-        Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-
-        End Sub
     End Class
 
 End Namespace

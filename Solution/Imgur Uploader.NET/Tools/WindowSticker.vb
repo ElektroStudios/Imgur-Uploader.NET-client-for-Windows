@@ -1,12 +1,4 @@
-﻿' ***********************************************************************
-' Author   : Elektro
-' Modified : 08-December-2014
-' ***********************************************************************
-' <copyright file="WindowSticker.vb" company="Elektro Studios">
-'     Copyright (c) Elektro Studios. All rights reserved.
-' </copyright>
-' ***********************************************************************
-
+﻿
 #Region " Usage Examples "
 
 ' ''' <summary>
