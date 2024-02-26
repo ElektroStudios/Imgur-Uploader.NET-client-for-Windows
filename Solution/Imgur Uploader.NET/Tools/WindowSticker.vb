@@ -64,7 +64,7 @@ Namespace Tools
             Get
                 Return Me.snapMargin1
             End Get
-            Set(ByVal value As Integer)
+            Set(value As Integer)
                 Me.DisposedCheck()
                 Me.snapMargin1 = value
             End Set
@@ -209,7 +209,7 @@ Namespace Tools
         ''' Initializes a new instance of WindowSticker class.
         ''' </summary>
         ''' <param name="ClientForm">The client form to assign this NativeWindow.</param>
-        Public Sub New(ByVal clientForm As Form)
+        Public Sub New(clientForm As Form)
 
             ' Assign the Formulary.
             Me.clientForm1 = clientForm
@@ -230,7 +230,7 @@ Namespace Tools
         ''' Assign the handle of the target Form to this NativeWindow,
         ''' necessary to override target Form's WndProc.
         ''' </summary>
-        Private Sub SetFormHandle(ByVal sender As Object, ByVal e As EventArgs) Handles clientForm1.HandleCreated, clientForm1.Load, clientForm1.Shown
+        Private Sub SetFormHandle(sender As Object, e As EventArgs) Handles clientForm1.HandleCreated, clientForm1.Load, clientForm1.Shown
 
             If (Me.clientForm1 IsNot Nothing) AndAlso (Not MyBase.Handle.Equals(Me.clientForm1.Handle)) Then
 
@@ -243,7 +243,7 @@ Namespace Tools
         ''' <summary>
         ''' Releases the Handle.
         ''' </summary>
-        Private Sub OnHandleDestroyed(ByVal sender As Object, ByVal e As EventArgs) Handles clientForm1.HandleDestroyed
+        Private Sub OnHandleDestroyed(sender As Object, e As EventArgs) Handles clientForm1.HandleDestroyed
 
             MyBase.ReleaseHandle()
 
@@ -290,9 +290,9 @@ Namespace Tools
         ''' <param name="ClientForm">The client form used to stick its borders.</param>
         ''' <param name="Handle">A pointer to a 'WINDOWPOS' structure that contains information about the window's new size and position.</param>
         ''' <param name="snapMargin">the snap margin (offset), in pixels.</param>
-        Private Sub SnapToDesktopBorder(ByVal clientForm As Form,
-                                        ByVal handle As IntPtr,
-                                        Optional ByVal snapMargin As Integer = 0I)
+        Private Sub SnapToDesktopBorder(clientForm As Form,
+handle As IntPtr,
+                                        Optional snapMargin As Integer = 0I)
 
             Dim newPosition As WindowPos = CType(Marshal.PtrToStructure(handle, GetType(WindowPos)), WindowPos)
 
@@ -439,7 +439,7 @@ Namespace Tools
         ''' Determines whether the specified System.Object instances are considered equal.
         ''' </summary>
         <EditorBrowsable(EditorBrowsableState.Never)>
-        Public Shadows Function Equals(ByVal obj As Object) As Boolean
+        Public Shadows Function Equals(obj As Object) As Boolean
             Return MyBase.Equals(obj)
         End Function
 
@@ -494,7 +494,7 @@ Namespace Tools
         ''' <c>true</c> to release both managed and unmanaged resources; 
         ''' <c>false</c> to release only unmanaged resources.
         ''' </param>
-        Protected Sub Dispose(ByVal isDisposing As Boolean)
+        Protected Sub Dispose(isDisposing As Boolean)
 
             If Not Me.isDisposed Then
 

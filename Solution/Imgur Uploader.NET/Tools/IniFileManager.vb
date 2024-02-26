@@ -175,7 +175,7 @@ Namespace Tools
             ''' Initializes a new instance of the <see cref="SectionNameInvalidFormatException" /> class with a specified error message.
             ''' </summary>
             ''' <param name="Message">Indicates the message that describes the error.</param>
-            Public Sub New(ByVal message As String)
+            Public Sub New(message As String)
 
                 MyBase.New(message)
 
@@ -186,8 +186,8 @@ Namespace Tools
             ''' </summary>
             ''' <param name="Message">Indicates the message that describes the error.</param>
             ''' <param name="InnerException">Indicates the InnerException message.</param>
-            Public Sub New(ByVal message As String,
-                           ByVal innerException As Exception)
+            Public Sub New(message As String,
+innerException As Exception)
 
                 MyBase.New(message, innerException)
 
@@ -214,8 +214,8 @@ Namespace Tools
         ''' the ini file is in the startup folder and has the same name as the running process. )
         ''' </param>
         ''' <param name="IniEncoding">Indicates a textencoding to read/write the ini file.</param>
-        Public Sub New(Optional ByVal iniFile As String = Nothing,
-                       Optional ByVal iniEncoding As Encoding = Nothing)
+        Public Sub New(Optional iniFile As String = Nothing,
+                       Optional iniEncoding As Encoding = Nothing)
 
             If Not String.IsNullOrEmpty(iniFile) Then
                 FilePath = iniFile
@@ -313,7 +313,7 @@ Namespace Tools
             ''' </summary>
             ''' <param name="RemoveEmptyLines">Remove empty lines.</param>
             ''' <returns>True if the operation success, otherwise False.</returns>
-            Public Shared Function Sort(Optional ByVal removeEmptyLines As Boolean = False) As Boolean
+            Public Shared Function Sort(Optional removeEmptyLines As Boolean = False) As Boolean
 
                 If Not [File].Exist() Then Return False
 
@@ -368,7 +368,7 @@ Namespace Tools
             ''' </summary>
             ''' <param name="Content">Indicates the text content to write in the initialization file.</param>
             ''' <returns>True if the operation success, otherwise False.</returns>
-            Public Shared Function Write(ByVal content As List(Of String)) As Boolean
+            Public Shared Function Write(content As List(Of String)) As Boolean
 
                 Try
                     IO.File.WriteAllLines(FilePath, content, TextEncoding)
@@ -403,8 +403,8 @@ Namespace Tools
             ''' <param name="KeyName">Indicates the key name that contains the value to modify.</param>
             ''' <param name="SectionName">Indicates the Section name where to find the key name.</param>
             ''' <returns>True if the key name exist, otherwise False.</returns>
-            Public Shared Function Exist(ByVal keyName As String,
-                                         Optional ByVal sectionName As String = Nothing) As Boolean
+            Public Shared Function Exist(keyName As String,
+                                         Optional sectionName As String = Nothing) As Boolean
 
                 If Not [File].Exist() Then Return False
 
@@ -439,9 +439,9 @@ Namespace Tools
             ''' <param name="Value">Indicates the new value.</param>
             ''' <param name="SectionName">Indicates the Section name where to find the key name.</param>
             ''' <returns>True if the operation success, otherwise False.</returns>
-            Public Shared Function [Set](ByVal keyName As String,
-                                         ByVal value As String,
-                                         Optional ByVal sectionName As String = Nothing) As Boolean
+            Public Shared Function [Set](keyName As String,
+value As String,
+                                         Optional sectionName As String = Nothing) As Boolean
 
                 If Not [File].Exist() Then [File].Create()
 
@@ -493,9 +493,9 @@ Namespace Tools
             ''' <param name="KeyName">Indicates the key name to retrieve their value.</param>
             ''' <param name="DefaultValue">Indicates a default value to return if the key name is not found.</param>
             ''' <param name="SectionName">Indicates the Section name where to find the key name.</param>
-            Public Shared Function [Get](ByVal keyName As String,
-                                         Optional ByVal defaultValue As Object = Nothing,
-                                         Optional ByVal sectionName As String = Nothing) As Object
+            Public Shared Function [Get](keyName As String,
+                                         Optional defaultValue As Object = Nothing,
+                                         Optional sectionName As String = Nothing) As Object
 
                 If Not [File].Exist() Then Return defaultValue
 
@@ -520,8 +520,8 @@ Namespace Tools
             ''' </summary>
             ''' <param name="KeyName">Indicates the Key name to retrieve their value.</param>
             ''' <param name="SectionName">Indicates the Section name where to find the key name.</param>
-            Private Shared Sub GetIndex(ByVal keyName As String,
-                                        Optional ByVal sectionName As String = Nothing)
+            Private Shared Sub GetIndex(keyName As String,
+                                        Optional sectionName As String = Nothing)
 
                 If content Is Nothing Then [File].Get()
 
@@ -580,8 +580,8 @@ Namespace Tools
             ''' <param name="KeyName">Indicates the key name to retrieve their value.</param>
             ''' <param name="SectionName">Indicates the Section name where to find the key name.</param>
             ''' <returns>True if the operation success, otherwise False.</returns>
-            Public Shared Function Remove(ByVal keyName As String,
-                                          Optional ByVal sectionName As String = Nothing) As Boolean
+            Public Shared Function Remove(keyName As String,
+                                          Optional sectionName As String = Nothing) As Boolean
 
                 If Not [File].Exist() Then Return False
 
@@ -626,7 +626,7 @@ Namespace Tools
             ''' </summary>
             ''' <param name="SectionName">Indicates the Section name to add.</param>
             ''' <returns>True if the operation success, otherwise False.</returns>
-            Public Shared Function Add(Optional ByVal sectionName As String = Nothing) As Boolean
+            Public Shared Function Add(Optional sectionName As String = Nothing) As Boolean
 
                 If Not [File].Exist() Then [File].Create()
 
@@ -658,7 +658,7 @@ Namespace Tools
             ''' Returns all the keys and values of an existing Section Name.
             ''' </summary>
             ''' <param name="SectionName">Indicates the section name where to retrieve their keynames and values.</param>
-            Public Shared Function [Get](ByVal sectionName As String) As List(Of String)
+            Public Shared Function [Get](sectionName As String) As List(Of String)
 
                 If content Is Nothing Then [File].Get()
 
@@ -709,7 +709,7 @@ Namespace Tools
             ''' </summary>
             ''' <param name="SectionName">Indicates the Section name to remove with all of it's key/values.</param>
             ''' <returns>True if the operation success, otherwise False.</returns>
-            Public Shared Function Remove(Optional ByVal sectionName As String = Nothing) As Boolean
+            Public Shared Function Remove(Optional sectionName As String = Nothing) As Boolean
 
                 If Not [File].Exist() Then Return False
 

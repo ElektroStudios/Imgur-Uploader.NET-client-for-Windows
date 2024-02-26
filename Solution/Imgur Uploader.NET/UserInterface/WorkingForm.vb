@@ -78,7 +78,7 @@ Namespace UserInterface
         ''' </summary>
         ''' <param name="frm">The FRM.</param>
         ''' <param name="parent">The parent.</param>
-        Private Sub CenterForm(ByVal frm As Form, Optional ByVal parent As Form = Nothing)
+        Private Sub CenterForm(frm As Form, Optional parent As Form = Nothing)
 
             Dim r As Rectangle
             If parent IsNot Nothing Then

@@ -11,10 +11,10 @@ Imports System.Runtime.InteropServices
 ' Review the values of the assembly attributes
 
 <Assembly: AssemblyTitle("Imgur Uploader.NET")>
-<Assembly: AssemblyDescription("Imgur client to upload images on your user account.")>
+<Assembly: AssemblyDescription("An Imgur desktop client to upload images on your account.")>
 <Assembly: AssemblyCompany("ElektroStudios")>
 <Assembly: AssemblyProduct("Imgur Uploader.NET")>
-<Assembly: AssemblyCopyright("Copyright © ElektroStudios 2019")>
+<Assembly: AssemblyCopyright("Copyright © ElektroStudios 2018-2024")>
 <Assembly: AssemblyTrademark("")> 
 
 <Assembly: ComVisible(False)> 
@@ -33,7 +33,7 @@ Imports System.Runtime.InteropServices
 ' by using the '*' as shown below:
 ' <Assembly: AssemblyVersion("1.0.*")> 
 
-<Assembly: AssemblyVersion("1.2.0.0")>
-<Assembly: AssemblyFileVersion("1.2.0.0")>
+<Assembly: AssemblyVersion("1.3.0.0")>
+<Assembly: AssemblyFileVersion("1.3.0.0")>
 
 <Assembly: NeutralResourcesLanguageAttribute("en")> 

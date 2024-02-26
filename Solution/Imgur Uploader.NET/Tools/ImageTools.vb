@@ -14,11 +14,11 @@ Namespace Tools
         ''' <param name="Bitmap">Indicates the image to resize.</param>
         ''' <param name="Percent">Indicates the percent size.</param>
         ''' <returns>Bitmap.</returns>
-        Public Shared Function ResizeImage(ByVal bitmap As Drawing.Bitmap,
-                                    ByVal percent As Double,
-                                    Optional ByVal quality As Drawing2D.InterpolationMode =
+        Public Shared Function ResizeImage(bitmap As Drawing.Bitmap,
+percent As Double,
+                                    Optional quality As Drawing2D.InterpolationMode =
                                                               Drawing2D.InterpolationMode.HighQualityBicubic,
-                                    Optional ByVal pixelFormat As Imaging.PixelFormat =
+                                    Optional pixelFormat As Imaging.PixelFormat =
                                                                   Imaging.PixelFormat.Format24bppRgb) As Drawing.Bitmap
 
             Dim width As Integer = (bitmap.Width \ (100I / percent))
@@ -43,10 +43,10 @@ Namespace Tools
         ''' <param name="targetImageFormat">The target image format.</param>
         ''' <param name="targetFileSize">The target filesize, in bytes.</param>
         ''' <exception cref="System.NotImplementedException">Resize Image to -1% and reset quality compression...</exception>
-        Public Shared Sub CompressImage(ByVal inputFile As String,
-                                        ByVal targettFile As String,
-                                        ByVal targetImageFormat As ImageFormat,
-                                        ByVal targetFileSize As Long)
+        Public Shared Sub CompressImage(inputFile As String,
+targettFile As String,
+targetImageFormat As ImageFormat,
+targetFileSize As Long)
 
             Dim qualityPercent As Integer = 100
             Dim resizePercent As Integer = 100

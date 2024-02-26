@@ -176,47 +176,47 @@ Namespace Tools
         ''' <summary>
         ''' Occurs when imgur service throws an 'access forbidden' response.
         ''' </summary>
-        Public Event OnAccessForbidden(ByVal sender As Object, ByVal e As ImgurStatus)
+        Public Event OnAccessForbidden(sender As Object, e As ImgurStatus)
 
         ''' <summary>
         ''' Occurs when imgur service throws an 'Authorization Failed' response.
         ''' </summary>
-        Public Event OnAuthorizationFailed(ByVal sender As Object, ByVal e As ImgurStatus)
+        Public Event OnAuthorizationFailed(sender As Object, e As ImgurStatus)
 
         ''' <summary>
         ''' Occurs when imgur service throws a 'Bad Image Format' response.
         ''' </summary>
-        Public Event OnBadImageFormat(ByVal sender As Object, ByVal e As ImgurStatus)
+        Public Event OnBadImageFormat(sender As Object, e As ImgurStatus)
 
         ''' <summary>
         ''' Occurs when imgur service throws an 'Internal Server Error' response.
         ''' </summary>
-        Public Event OnInternalServerError(ByVal sender As Object, ByVal e As ImgurStatus)
+        Public Event OnInternalServerError(sender As Object, e As ImgurStatus)
 
         ''' <summary>
         ''' Occurs when imgur service throws an 'Page Is Not Found' response.
         ''' </summary>
-        Public Event OnPageIsNotFound(ByVal sender As Object, ByVal e As ImgurStatus)
+        Public Event OnPageIsNotFound(sender As Object, e As ImgurStatus)
 
         ''' <summary>
         ''' Occurs when imgur service throws an 'access forbidden' response.
         ''' </summary>
-        Public Event OnUploadRateLimitError(ByVal sender As Object, ByVal e As ImgurStatus)
+        Public Event OnUploadRateLimitError(sender As Object, e As ImgurStatus)
 
         ''' <summary>
         ''' Occurs when imgur service throws an unknown (unhandled) response.
         ''' </summary>
-        Public Event OnUnknownError(ByVal sender As Object, ByVal e As ImgurStatus)
+        Public Event OnUnknownError(sender As Object, e As ImgurStatus)
 
         ''' <summary>
         ''' Occurs when imgur service throws an unknown (unhandled) response on an Asynchronous upload.
         ''' </summary>
-        Public Event OnAsyncError(ByVal sender As Object, ByVal ex As Exception)
+        Public Event OnAsyncError(sender As Object, ex As Exception)
 
         ''' <summary>
         ''' Occurs when imgur service throws sucessful response on an Asynchronous upload.
         ''' </summary>
-        Public Event OnAsyncSuccess(ByVal sender As Object, ByVal e As ImgurImage)
+        Public Event OnAsyncSuccess(sender As Object, e As ImgurImage)
 
 #End Region
 
@@ -237,7 +237,7 @@ Namespace Tools
         ''' <param name="ClientSecret">
         ''' Indicates the unique client secret that is provided with the imgur API registrationapplication registration.
         ''' </param>
-        Public Sub New(ByVal clientId As String, ByVal clientSecret As String)
+        Public Sub New(clientId As String, clientSecret As String)
 
             Me.ClientId = clientId
             Me.ClientSecret = clientSecret
@@ -253,7 +253,7 @@ Namespace Tools
         ''' </summary>
         ''' <param name="sender">The source of the event.</param>
         ''' <param name="e">The <see cref="UploadValuesCompletedEventArgs"/> instance containing the event data.</param>
-        Private Sub WC_UploadValuesCompleted(ByVal sender As Object, ByVal e As UploadValuesCompletedEventArgs)
+        Private Sub WC_UploadValuesCompleted(sender As Object, e As UploadValuesCompletedEventArgs)
 
             If e.Error IsNot Nothing Then
 
@@ -261,7 +261,7 @@ Namespace Tools
                     ' Do Nothing
 
                 Else 'If TypeOf (e.Error.InnerException) Is WebException Then
-                    asyncError = True
+                    Me.asyncError = True
                     RaiseEvent OnAsyncError(Me, e.Error)
                     Exit Sub
 
@@ -270,7 +270,7 @@ Namespace Tools
             End If
 
             If Not e.Cancelled Then
-                responseAsync = e.Result
+                Me.responseAsync = e.Result
             End If
 
         End Sub
@@ -286,7 +286,7 @@ Namespace Tools
         ''' Indicates a filename that points to an existing image.
         ''' </param>
         ''' <returns>An instance of the imgurImage Class that contains the url and it's thumbnail urls.</returns>
-        Public Function UploadImage(ByVal img As String) As ImgurImage
+        Public Function UploadImage(img As String) As ImgurImage
 
             If String.IsNullOrEmpty(Me.ClientId) _
             OrElse String.IsNullOrWhiteSpace(Me.ClientId) Then
@@ -395,10 +395,10 @@ Namespace Tools
         ''' <returns>
         ''' An instance of the imgurImage Class that contains the url and it's thumbnail urls.
         ''' </returns>
-        Public Function UploadImageAsync(ByVal img As String) As ImgurImage
+        Public Function UploadImageAsync(img As String) As ImgurImage
 
-            cts = New CancellationTokenSource
-            token = cts.Token
+            Me.cts = New CancellationTokenSource
+            Me.token = Me.cts.Token
 
             If String.IsNullOrEmpty(Me.ClientId) _
             OrElse String.IsNullOrWhiteSpace(Me.ClientId) Then
@@ -415,12 +415,15 @@ Namespace Tools
                 ' Create a WebClient. 
                 Using wc As New WebClient()
 
-                    Using ctr As CancellationTokenRegistration = token.Register(Sub() wc.CancelAsync())
+                    Using ctr As CancellationTokenRegistration = Me.token.Register(Sub() wc.CancelAsync())
 
                         ' Read the image.
                         Dim values As New NameValueCollection() From
                             {
-                                {"image", Convert.ToBase64String(File.ReadAllBytes(img))}
+                                {"image", Convert.ToBase64String(File.ReadAllBytes(img))},
+                                {"type", "base64"},
+                                {"title", Path.GetFileNameWithoutExtension(img)},
+                                {"description", Path.GetFileNameWithoutExtension(img)}
                             }
 
                         ' Set the Headers.
@@ -434,13 +437,13 @@ Namespace Tools
 
                         ' Upload the image, and get the response.
                         Try
-                            responseAsync = Nothing
-                            AddHandler wc.UploadValuesCompleted, AddressOf WC_UploadValuesCompleted
+                            Me.responseAsync = Nothing
+                            AddHandler wc.UploadValuesCompleted, AddressOf Me.WC_UploadValuesCompleted
                             wc.UploadValuesAsync(New Uri("https://api.imgur.com/3/upload.xml"), values)
 
-                            Do Until responseAsync IsNot Nothing OrElse asyncError
-                                If cts.IsCancellationRequested OrElse asyncError Then
-                                    asyncError = False
+                            Do Until Me.responseAsync IsNot Nothing OrElse Me.asyncError
+                                If Me.cts.IsCancellationRequested OrElse Me.asyncError Then
+                                    Me.asyncError = False
                                     Return Nothing
                                 End If
                             Loop
@@ -452,7 +455,7 @@ Namespace Tools
                         End Try
 
                         ' Read the response (Converting Byte-Array to Stream).
-                        Using sr As New StreamReader(New MemoryStream(responseAsync))
+                        Using sr As New StreamReader(New MemoryStream(Me.responseAsync))
 
                             Dim serverResponse As String = sr.ReadToEnd
                             Dim xdoc As New XDocument(XDocument.Parse(serverResponse))
@@ -512,7 +515,7 @@ Namespace Tools
         ''' Cancels the current asynchronous uploading.
         ''' </summary>
         Public Sub UploadImageAsyncCancel()
-            cts.Cancel(True)
+            Me.cts.Cancel(True)
         End Sub
 
 #End Region
@@ -525,8 +528,8 @@ Namespace Tools
         ''' <param name="ImageUrl">Indicates the imgur image url.</param>
         ''' <param name="Thumbnail">Indicates the kind of thumbnail url to get.</param>
         ''' <returns>The imgur thumbnail image url.</returns>
-        Public Shared Function GetThumbnail(ByVal imageUrl As Uri,
-                                            ByVal thumbnail As ThumbnailType) As String
+        Public Shared Function GetThumbnail(imageUrl As Uri,
+thumbnail As ThumbnailType) As String
 
             Return String.Format("http://i.imgur.com/{0}{1}{2}",
                                  Path.GetFileNameWithoutExtension(imageUrl.AbsoluteUri),
@@ -544,7 +547,7 @@ Namespace Tools
         ''' </summary>
         ''' <param name="Status">The status.</param>
         ''' <returns>imgurStatus.</returns>
-        Private Function GetResultFromStatus(ByVal status As Integer) As ImgurStatus
+        Private Function GetResultFromStatus(status As Integer) As ImgurStatus
 
             Dim statusCode As ImgurStatus = ImgurStatus.UnknownError
             [Enum].TryParse(Of ImgurStatus)(value:=status.ToString, result:=statusCode)
@@ -576,7 +579,7 @@ Namespace Tools
         ''' Initializes a new instance of the <see cref="imgurImage" /> class.
         ''' </summary>
         ''' <param name="ImageUrl">Indicates the url of the uploaded image.</param>
-        Public Sub New(ByVal imageUrl As Uri)
+        Public Sub New(imageUrl As Uri)
             Me.imageUrl = imageUrl
         End Sub
 

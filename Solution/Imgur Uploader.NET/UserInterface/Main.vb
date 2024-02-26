@@ -15,6 +15,7 @@ Imports CButtonLib
 Imports System.Threading
 Imports System.IO
 Imports System.Drawing.Imaging
+Imports System.Runtime.CompilerServices
 
 #End Region
 
@@ -30,12 +31,12 @@ Namespace UserInterface
         ''' <summary>
         ''' The <see cref="WindowSticker"/> instance that sticks the Form on the Desktop screen.
         ''' </summary>
-        Private windowSticker As New WindowSticker(ClientForm:=Me) With {.SnapMargin = 35}
+        Private windowSticker As New WindowSticker(clientForm:=Me) With {.SnapMargin = 35}
 
         ''' <summary>
         ''' Indicates the imgurAPI instance to upload images.
         ''' </summary>
-        Private WithEvents imgurClient As New ImgurAPI()
+        Private WithEvents ImgurClient As New ImgurAPI()
 
         ''' <summary>
         ''' Indicates the supported formats by Imgur.
@@ -68,7 +69,7 @@ Namespace UserInterface
         Public Sub New()
 
             ' This call is required by the designer.
-            InitializeComponent()
+            Me.InitializeComponent()
 
             ' Add any initialization after the InitializeComponent() call.
             Me.SetClientIds()
@@ -84,13 +85,11 @@ Namespace UserInterface
         ''' </summary>
         ''' <param name="sender">The source of the event.</param>
         ''' <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        Private Sub Main_Shown(ByVal sender As Object, ByVal e As EventArgs) _
+        Private Sub Main_Shown(sender As Object, e As EventArgs) _
         Handles Me.Shown
 
             If My.Application.CommandLineArgs.Count <> 0 Then
-
-                Me.LoadImage(New FileInfo(My.Application.CommandLineArgs.First))
-
+                Me.LoadFile(New FileInfo(My.Application.CommandLineArgs.First))
             End If
 
         End Sub
@@ -100,7 +99,7 @@ Namespace UserInterface
         ''' </summary>
         ''' <param name="sender">The source of the event.</param>
         ''' <param name="e">The <see cref="DragEventArgs"/> instance containing the event data.</param>
-        Private Sub Main_DragEnter(ByVal sender As Object, ByVal e As DragEventArgs) _
+        Private Sub Main_DragEnter(sender As Object, e As DragEventArgs) _
         Handles Me.DragEnter
 
             If e.Data.GetDataPresent(DataFormats.FileDrop) Then
@@ -114,13 +113,11 @@ Namespace UserInterface
         ''' </summary>
         ''' <param name="sender">The source of the event.</param>
         ''' <param name="e">The <see cref="DragEventArgs"/> instance containing the event data.</param>
-        Private Sub Main_DragDrop(ByVal sender As Object, ByVal e As DragEventArgs) _
+        Private Sub Main_DragDrop(sender As Object, e As DragEventArgs) _
         Handles Me.DragDrop
 
             If e.Data.GetDataPresent(DataFormats.FileDrop) Then
-
-                Me.LoadImage(New FileInfo(DirectCast(e.Data.GetData(DataFormats.FileDrop), IEnumerable(Of String))(0)))
-
+                Me.LoadFile(New FileInfo(DirectCast(e.Data.GetData(DataFormats.FileDrop), IEnumerable(Of String))(0)))
             End If
 
         End Sub
@@ -130,13 +127,11 @@ Namespace UserInterface
         ''' </summary>
         ''' <param name="sender">The source of the event.</param>
         ''' <param name="e">The <see cref="MouseEventArgs"/> instance containing the event data.</param>
-        Private Sub CButton_BrowseImage_ClickButtonArea(ByVal sender As Object, ByVal e As MouseEventArgs) _
+        Private Sub CButton_BrowseImage_ClickButtonArea(sender As Object, e As MouseEventArgs) _
         Handles CButton_BrowseImage.ClickButtonArea
 
             If Me.OpenFileDialog_BrowseImage.ShowDialog() = Windows.Forms.DialogResult.OK Then
-
-                Me.LoadImage(New FileInfo(Me.OpenFileDialog_BrowseImage.FileName))
-
+                Me.LoadFile(New FileInfo(Me.OpenFileDialog_BrowseImage.FileName))
             End If
 
         End Sub
@@ -146,7 +141,7 @@ Namespace UserInterface
         ''' </summary>
         ''' <param name="Sender">The source of the event.</param>
         ''' <param name="e">The <see cref="MouseEventArgs"/> instance containing the event data.</param>
-        Private Sub CButton_Abort_ClickButtonArea(ByVal sender As Object, ByVal e As MouseEventArgs) _
+        Private Sub CButton_Abort_ClickButtonArea(sender As Object, e As MouseEventArgs) _
         Handles CButton_Abort.ClickButtonArea
 
             Me.uploadTaskCTSource.Cancel(True)
@@ -167,20 +162,17 @@ Namespace UserInterface
         ''' </summary>
         ''' <param name="sender">The source of the event.</param>
         ''' <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        Private Sub Buttons_Clip_EnabledChanged(ByVal sender As Object, ByVal e As EventArgs) _
+        Private Sub Buttons_Clip_EnabledChanged(sender As Object, e As EventArgs) _
         Handles Button_Clip_Normal.EnabledChanged,
                 Button_Clip_HugeThumbnail.EnabledChanged,
                 Button_Clip_LargeThumbnail.EnabledChanged,
                 Button_Clip_MediumThumbnail.EnabledChanged,
                 Button_Clip_SmallThumbnail.EnabledChanged,
-                Button_BBCode_Normal.EnabledChanged,
-                Button_BBCode_Thumbnail.EnabledChanged
+                Button_Clip_BBCode_Normal.EnabledChanged,
+                Button_Clip_BBCode_Thumbnail.EnabledChanged,
+                Button_Clip_Markdown_Normal.EnabledChanged
 
-            If DirectCast(sender, Button).Enabled Then
-                DirectCast(sender, Button).BackgroundImage = My.Resources.Clipboard
-            Else
-                DirectCast(sender, Button).BackgroundImage = My.Resources.ClipboardGray
-            End If
+            DirectCast(sender, Button).BackgroundImage = If(DirectCast(sender, Button).Enabled, My.Resources.Clipboard, My.Resources.ClipboardGray)
 
         End Sub
 
@@ -189,14 +181,15 @@ Namespace UserInterface
         ''' </summary>
         ''' <param name="sender">The source of the event.</param>
         ''' <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        Private Sub Buttons_Clip_Click(ByVal sender As Object, ByVal e As EventArgs) _
+        Private Sub Buttons_Clip_Click(sender As Object, e As EventArgs) _
         Handles Button_Clip_Normal.Click,
                 Button_Clip_HugeThumbnail.Click,
                 Button_Clip_LargeThumbnail.Click,
                 Button_Clip_MediumThumbnail.Click,
                 Button_Clip_SmallThumbnail.Click,
-                Button_BBCode_Normal.Click,
-                Button_BBCode_Thumbnail.Click
+                Button_Clip_BBCode_Normal.Click,
+                Button_Clip_BBCode_Thumbnail.Click,
+                Button_Clip_Markdown_Normal.Click
 
             Clipboard.SetText(DirectCast(Me.TableLayoutPanel1.Controls("TextBox_" & CStr(DirectCast(sender, Button).Tag)), TextBox).Text)
 
@@ -207,18 +200,14 @@ Namespace UserInterface
         ''' </summary>
         ''' <param name="sender">The source of the event.</param>
         ''' <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        Private Sub Buttons_Url_EnabledChanged(ByVal sender As Object, ByVal e As EventArgs) _
+        Private Sub Buttons_Url_EnabledChanged(sender As Object, e As EventArgs) _
         Handles Button_Url_Normal.EnabledChanged,
                 Button_Url_HugeThumbnail.EnabledChanged,
                 Button_Url_LargeThumbnail.EnabledChanged,
                 Button_Url_MediumThumbnail.EnabledChanged,
                 Button_Url_SmallThumbnail.EnabledChanged
 
-            If DirectCast(sender, Button).Enabled Then
-                DirectCast(sender, Button).BackgroundImage = My.Resources.Go
-            Else
-                DirectCast(sender, Button).BackgroundImage = My.Resources.Go_Gray
-            End If
+            DirectCast(sender, Button).BackgroundImage = If(DirectCast(sender, Button).Enabled, My.Resources.Go, My.Resources.Go_Gray)
 
         End Sub
 
@@ -227,7 +216,7 @@ Namespace UserInterface
         ''' </summary>
         ''' <param name="sender">The source of the event.</param>
         ''' <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        Private Sub Buttons_Url_Click(ByVal sender As Object, ByVal e As EventArgs) _
+        Private Sub Buttons_Url_Click(sender As Object, e As EventArgs) _
         Handles Button_Url_Normal.Click,
                 Button_Url_HugeThumbnail.Click,
                 Button_Url_LargeThumbnail.Click,
@@ -247,14 +236,15 @@ Namespace UserInterface
         ''' </summary>
         ''' <param name="sender">The source of the event.</param>
         ''' <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        Private Sub TextBoxes_EnabledChanged(ByVal sender As Object, ByVal e As EventArgs) _
+        Private Sub TextBoxes_EnabledChanged(sender As Object, e As EventArgs) _
         Handles TextBox_Url_Normal.EnabledChanged,
                 TextBox_Url_SmallThumbnail.EnabledChanged,
                 TextBox_Url_MediumThumbnail.EnabledChanged,
                 TextBox_Url_LargeThumbnail.EnabledChanged,
                 TextBox_Url_HugeThumbnail.EnabledChanged,
                 TextBox_BBCode_Normal.EnabledChanged,
-                TextBox_BBCode_Thumbnail.EnabledChanged
+                TextBox_BBCode_Thumbnail.EnabledChanged,
+                TextBox_Markdown_Normal.EnabledChanged
 
             Dim tb As TextBox = DirectCast(sender, TextBox)
 
@@ -269,7 +259,7 @@ Namespace UserInterface
         ''' </summary>
         ''' <param name="sender">The source of the event.</param>
         ''' <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        Private Sub TextBox_Urls_MouseDown_MouseMove(ByVal sender As Object, ByVal e As EventArgs) _
+        Private Sub TextBox_Urls_MouseDown_MouseMove(sender As Object, e As EventArgs) _
         Handles TextBox_Url_Normal.MouseDown,
                 TextBox_Url_SmallThumbnail.MouseDown,
                 TextBox_Url_MediumThumbnail.MouseDown,
@@ -277,13 +267,15 @@ Namespace UserInterface
                 TextBox_Url_HugeThumbnail.MouseDown,
                 TextBox_BBCode_Normal.MouseDown,
                 TextBox_BBCode_Thumbnail.MouseDown,
+                TextBox_Markdown_Normal.MouseDown,
                 TextBox_Url_Normal.MouseMove,
                 TextBox_Url_SmallThumbnail.MouseMove,
                 TextBox_Url_MediumThumbnail.MouseMove,
                 TextBox_Url_LargeThumbnail.MouseMove,
                 TextBox_Url_HugeThumbnail.MouseMove,
                 TextBox_BBCode_Normal.MouseMove,
-                TextBox_BBCode_Thumbnail.MouseMove
+                TextBox_BBCode_Thumbnail.MouseMove,
+                TextBox_Markdown_Normal.MouseMove
 
             DirectCast(sender, TextBox).SelectAll()
 
@@ -419,8 +411,8 @@ Namespace UserInterface
         ''' </summary>
         ''' <param name="sender">The source of the event.</param>
         ''' <param name="e">The <see cref="imgurAPI.imgurStatus"/> instance containing the event data.</param>
-        Private Sub ImgurClient_OnAsyncError(ByVal sender As Object, ByVal e As Exception) _
-        Handles imgurClient.OnAsyncError
+        Private Sub ImgurClient_OnAsyncError(sender As Object, e As Exception) _
+        Handles ImgurClient.OnAsyncError
 
             Me.InvokeControl(Me, Sub(x As Form) x.Enabled = False)
 
@@ -438,8 +430,8 @@ Namespace UserInterface
         ''' </summary>
         ''' <param name="sender">The source of the event.</param>
         ''' <param name="e">The <see cref="ImgurImage"/> instance containing the event data.</param>
-        Private Sub ImgurClient_OnAsyncSuccess(ByVal sender As Object, ByVal e As ImgurImage) _
-        Handles imgurClient.OnAsyncSuccess
+        Private Sub ImgurClient_OnAsyncSuccess(sender As Object, e As ImgurImage) _
+        Handles ImgurClient.OnAsyncSuccess
 
             Me.InvokeControl(Me.CButton_BrowseImage, Sub(x As CButton)
                                                          x.Show()
@@ -465,30 +457,33 @@ Namespace UserInterface
             Select Case IniFileManager.File.Exist()
 
                 Case True
-                    Me.imgurClient.ClientId = CStr(IniFileManager.Key.Get("ClientId", "", "[API]"))
-                    Me.imgurClient.ClientSecret = CStr(IniFileManager.Key.Get("ClientSecret", "", "[API]"))
+                    Me.ImgurClient.ClientId = CStr(IniFileManager.Key.Get("ClientId", "", "[API]"))
+                    Me.ImgurClient.ClientSecret = CStr(IniFileManager.Key.Get("ClientSecret", "", "[API]"))
 
                 Case False
-                    MessageBox.Show(String.Format("'{0}' file not found",
-                                                  Path.GetFileName(IniFileManager.FilePath)),
-                                    Me.Text,
-                                    MessageBoxButtons.OK, MessageBoxIcon.Error)
+                    MessageBox.Show(String.Format("'{0}' file not found", Path.GetFileName(IniFileManager.FilePath)), Me.Text, MessageBoxButtons.OK, MessageBoxIcon.Error)
                     End
 
             End Select
 
-            If String.IsNullOrEmpty(Me.imgurClient.ClientId) Then
-                MessageBox.Show("ClientId is empty",
-                                Me.Text,
-                                MessageBoxButtons.OK, MessageBoxIcon.Error)
+            If String.IsNullOrEmpty(Me.ImgurClient.ClientId) Then
+                MessageBox.Show("Client Id. value is empty in the INI file", Me.Text, MessageBoxButtons.OK, MessageBoxIcon.Error)
                 End
+            End If
 
-            ElseIf String.IsNullOrEmpty(Me.imgurClient.ClientSecret) Then
-                MessageBox.Show("ClientSecret is empty",
-                                Me.Text,
-                                MessageBoxButtons.OK, MessageBoxIcon.Error)
+            If String.IsNullOrEmpty(Me.ImgurClient.ClientSecret) Then
+                MessageBox.Show("Client Secret value is empty in the INI file.", Me.Text, MessageBoxButtons.OK, MessageBoxIcon.Error)
                 End
+            End If
 
+            If Not Me.ImgurClient.ClientId Like "[aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9]*" Then
+                MessageBox.Show("Ivalid Client Id. value specified in the INI file", Me.Text, MessageBoxButtons.OK, MessageBoxIcon.Error)
+                End
+            End If
+
+            If Not Me.ImgurClient.ClientSecret Like "[aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9][aA0-zZ9]*" Then
+                MessageBox.Show("Ivalid Client Secret value specified in the INI file", Me.Text, MessageBoxButtons.OK, MessageBoxIcon.Error)
+                End
             End If
 
         End Sub
@@ -500,10 +495,7 @@ Namespace UserInterface
         ''' <param name="width">The thumbnail width.</param>
         ''' <param name="height">The thumbnail height.</param>
         ''' <returns>The thumbnail.</returns>
-        Private Function GetThumbnail(ByVal filePath As String,
-                                      ByVal width As Integer,
-                                      ByVal height As Integer) As Image
-
+        Private Function GetThumbnail(filePath As String, width As Integer, height As Integer) As Image
 
             Using bmp As New Bitmap(filePath)
                 Return ImageTools.Resize(bmp, New Size(width, height), keepAspectRatio:=True)
@@ -516,12 +508,12 @@ Namespace UserInterface
         ''' Loads an image from commandline or Drag-Drop.
         ''' </summary>
         ''' <param name="ImageFile">The image file.</param>
-        Private Sub LoadImage(ByVal imageFile As FileInfo)
+        Private Sub LoadFile(imageFile As FileInfo)
 
             Me.Enabled = False
 
             If File.Exists(imageFile.FullName) _
-            AndAlso supportedFormats.Contains(imageFile.Extension.ToUpper) Then
+            AndAlso Me.supportedFormats.Contains(imageFile.Extension.ToUpper) Then
 
                 Try
                     Me.PictureBox_Logo.BackgroundImage = Me.GetThumbnail(imageFile.FullName,
@@ -634,8 +626,8 @@ Namespace UserInterface
                 Me.uploadTaskCTSource = New CancellationTokenSource
                 Me.uploadTaskCT = Me.uploadTaskCTSource.Token
                 Me.uploadTask = Task.Factory.StartNew(Sub()
-                                                          Me.UploadImage(If(Not compressFlag, imageFile.FullName, compressedFile), uploadTaskCT)
-                                                      End Sub, uploadTaskCT)
+                                                          Me.UploadImage(If(Not compressFlag, imageFile.FullName, compressedFile), Me.uploadTaskCT)
+                                                      End Sub, Me.uploadTaskCT)
 
             Else
                 MessageBox.Show("Unsupported file format.",
@@ -652,48 +644,48 @@ Namespace UserInterface
         ''' </summary>
         ''' <param name="filename">The filename.</param>
         ''' <param name="ct">The Task CancellationToken.</param>
-        Private Sub UploadImage(ByVal filename As String, ByVal ct As CancellationToken)
+        Private Sub UploadImage(filename As String, ct As CancellationToken)
 
             Me.InvokeControl(Me, Sub(x As Form) x.AllowDrop = False)
             Me.InvokeControl(Me.Panel_Urls, Sub(x As Panel) x.Enabled = False)
 
-            Me.ToolStripStatusLabel_File.Text = String.Format("Uploading: '{0}'",
-                                                              Path.GetFileName(filename))
+            Me.ToolStripStatusLabel_File.Text = String.Format("Uploading: '{0}'", Path.GetFileName(filename))
 
             ' Dim flag As Boolean = False
             Dim urls As ImgurImage = Nothing
 
-            Using uploadTaskCTSource.Token.Register(Sub() Me.imgurClient.UploadImageAsyncCancel())
-                urls = Me.imgurClient.UploadImageAsync(filename)
+            Using Me.uploadTaskCTSource.Token.Register(Sub() Me.ImgurClient.UploadImageAsyncCancel())
+                urls = Me.ImgurClient.UploadImageAsync(filename)
             End Using
 
             If ct.IsCancellationRequested Then
-                Me.ToolStripStatusLabel_File.Text = String.Format("Aborted: '{0}'", Path.GetFileName(filename))
+                Me.InvokeControl(Me.StatusStrip1, Sub() Me.ToolStripStatusLabel_File.Text = String.Format("Aborted: '{0}'", Path.GetFileName(filename)))
                 Exit Sub
 
             ElseIf urls IsNot Nothing Then
 
-                With urls
+                Me.InvokeControl(Me.TextBox_Url_Normal, Sub(x As TextBox) x.Text = urls.Normal)
+                Me.InvokeControl(Me.TextBox_Url_SmallThumbnail, Sub(x As TextBox) x.Text = urls.SmallThumbnail)
+                Me.InvokeControl(Me.TextBox_Url_MediumThumbnail, Sub(x As TextBox) x.Text = urls.MediumThumbnail)
+                Me.InvokeControl(Me.TextBox_Url_LargeThumbnail, Sub(x As TextBox) x.Text = urls.LargeThumbnail)
+                Me.InvokeControl(Me.TextBox_Url_HugeThumbnail, Sub(x As TextBox) x.Text = urls.HugeThumbnail)
+                Me.InvokeControl(Me.TextBox_BBCode_Normal, Sub(x As TextBox) x.Text = $"[img]{urls.Normal}[/img]")
+                Me.InvokeControl(Me.TextBox_BBCode_Thumbnail, Sub(x As TextBox) x.Text = $"[url={urls.Normal}][img]{urls.LargeThumbnail}[/img][/url]")
+                Me.InvokeControl(Me.TextBox_Markdown_Normal, Sub(x As TextBox) x.Text = $"![IMAGE DESCRIPTION]({urls.Normal})")
 
-                    Me.InvokeControl(Me.TextBox_Url_Normal, Sub(x As TextBox) x.Text = .Normal)
-                    Me.InvokeControl(Me.TextBox_Url_SmallThumbnail, Sub(x As TextBox) x.Text = .SmallThumbnail)
-                    Me.InvokeControl(Me.TextBox_Url_MediumThumbnail, Sub(x As TextBox) x.Text = .MediumThumbnail)
-                    Me.InvokeControl(Me.TextBox_Url_LargeThumbnail, Sub(x As TextBox) x.Text = .LargeThumbnail)
-                    Me.InvokeControl(Me.TextBox_Url_HugeThumbnail, Sub(x As TextBox) x.Text = .HugeThumbnail)
-                    Me.InvokeControl(Me.TextBox_BBCode_Normal, Sub(x As TextBox) x.Text = String.Format("[img]{0}[/img]", .Normal))
-                    Me.InvokeControl(Me.TextBox_BBCode_Thumbnail, Sub(x As TextBox) x.Text = String.Format("[url={0}][img]{1}[/img][/url]", .Normal, .LargeThumbnail))
-
-                End With '/ urls
-
-                Me.ToolStripStatusLabel_File.Text = String.Format("Uploaded: '{0}'",
+                Me.InvokeControl(Me.StatusStrip1, Sub()
+                                                      Me.ToolStripStatusLabel_File.Text = String.Format("Uploaded: '{0}'",
                                                                   Path.GetFileName(filename))
-                Me.ToolStripStatusLabel_File.ForeColor = Color.Gainsboro
+                                                      Me.ToolStripStatusLabel_File.ForeColor = Color.Gainsboro
+                                                  End Sub)
 
             Else
 
-                Me.ToolStripStatusLabel_File.Text = String.Format("Error: '{0}'",
+                Me.InvokeControl(Me.StatusStrip1, Sub()
+                                                      Me.ToolStripStatusLabel_File.Text = String.Format("Error: '{0}'",
                                                                   Path.GetFileName(filename))
-                Me.ToolStripStatusLabel_File.ForeColor = Color.IndianRed
+                                                      Me.ToolStripStatusLabel_File.ForeColor = Color.IndianRed
+                                                  End Sub)
 
             End If '/ urls IsNot Nothing
 
@@ -713,10 +705,10 @@ Namespace UserInterface
         ''' <typeparam name="T"></typeparam>
         ''' <param name="control">The control to invoke.</param>
         ''' <param name="action">The encapsulated method.</param>
-        Public Sub InvokeControl(Of T As Control)(ByVal control As T, ByVal action As Action(Of T))
+        Public Sub InvokeControl(Of T As Control)(control As T, action As Action(Of T))
 
             If control.InvokeRequired Then
-                control.Invoke(New Action(Of T, Action(Of T))(AddressOf InvokeControl),
+                control.Invoke(New Action(Of T, Action(Of T))(AddressOf Me.InvokeControl),
                                     New Object() {control, action})
 
             Else
