@@ -103,7 +103,7 @@ This work is distributed for educational purposes and without any profit motive.
 <p align="center"><img src="/Images/envato_circle.png" height=100></p>
 <p align="center">__________________</p>
 <h3 align="center">Purchasing software of mine at Envato's Codecanyon marketplace:</h3>
-<p align="center">If you are a .NET developer, you may want to explore '<b>DevCase Class Library for .NET</b>', <br align="center">a huge set of APIs that I have on sale. Check out the product by clicking <a href="https://codecanyon.net/item/elektrokit-class-library-for-net/19260282">here</a></br><br align="center"><i>Almost all reusable code that you can find across my open source works is condensed, refined and provided through DevCase Class Library.</i></p>
+<p align="center">If you are a .NET developer, you may want to explore '<b>DevCase Class Library for .NET</b>', <br align="center">a huge set of APIs that I have on sale. Check out the product by clicking <a href="https://codecanyon.net/item/elektrokit-class-library-for-net/19260282">here</a></br><br align="center"><i>It also contains all piece of reusable code that you can find across the source code of my open source works.</i></p>
 <br></br>
 
 <h2 align="center"><u>Your support means the world to me! Thank you for considering it!</u> 👍</h2>
