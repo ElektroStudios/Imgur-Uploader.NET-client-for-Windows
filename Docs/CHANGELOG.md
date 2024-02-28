@@ -5,6 +5,7 @@
     • The program hangs during the image upload procedure (on Release mode).
 #### 🌟 Improvements:
     • Now the program window allows to resize.
+    • CButtonLib updated to last version.
 
 ## v1.3 (2024) 🔄
 #### 🚀 New Features:
