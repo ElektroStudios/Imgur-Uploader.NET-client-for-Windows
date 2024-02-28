@@ -396,7 +396,6 @@ Namespace Tools
         ''' An instance of the imgurImage Class that contains the url and it's thumbnail urls.
         ''' </returns>
         Public Function UploadImageAsync(img As String) As ImgurImage
-
             Me.cts = New CancellationTokenSource
             Me.token = Me.cts.Token
 
@@ -442,6 +441,11 @@ Namespace Tools
                             wc.UploadValuesAsync(New Uri("https://api.imgur.com/3/upload.xml"), values)
 
                             Do Until Me.responseAsync IsNot Nothing OrElse Me.asyncError
+#If Not DEBUG Then
+                                Thread.Sleep(100)
+                                Application.DoEvents()
+#End If
+                                ' MsgBox(16)
                                 If Me.cts.IsCancellationRequested OrElse Me.asyncError Then
                                     Me.asyncError = False
                                     Return Nothing

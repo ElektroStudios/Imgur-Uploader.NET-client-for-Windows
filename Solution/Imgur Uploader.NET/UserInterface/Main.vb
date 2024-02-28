@@ -88,6 +88,8 @@ Namespace UserInterface
         Private Sub Main_Shown(sender As Object, e As EventArgs) _
         Handles Me.Shown
 
+            Me.MinimumSize = Me.Size
+
             If My.Application.CommandLineArgs.Count <> 0 Then
                 Me.LoadFile(New FileInfo(My.Application.CommandLineArgs.First))
             End If
@@ -649,7 +651,7 @@ Namespace UserInterface
             Me.InvokeControl(Me, Sub(x As Form) x.AllowDrop = False)
             Me.InvokeControl(Me.Panel_Urls, Sub(x As Panel) x.Enabled = False)
 
-            Me.ToolStripStatusLabel_File.Text = String.Format("Uploading: '{0}'", Path.GetFileName(filename))
+            Me.ToolStripStatusLabel_File.Text = String.Format("Uploading: {0}...", Path.GetFileName(filename))
 
             ' Dim flag As Boolean = False
             Dim urls As ImgurImage = Nothing
@@ -659,7 +661,7 @@ Namespace UserInterface
             End Using
 
             If ct.IsCancellationRequested Then
-                Me.InvokeControl(Me.StatusStrip1, Sub() Me.ToolStripStatusLabel_File.Text = String.Format("Aborted: '{0}'", Path.GetFileName(filename)))
+                Me.InvokeControl(Me.StatusStrip1, Sub() Me.ToolStripStatusLabel_File.Text = String.Format("Aborted: {0}", Path.GetFileName(filename)))
                 Exit Sub
 
             ElseIf urls IsNot Nothing Then
@@ -674,7 +676,7 @@ Namespace UserInterface
                 Me.InvokeControl(Me.TextBox_Markdown_Normal, Sub(x As TextBox) x.Text = $"![IMAGE DESCRIPTION]({urls.Normal})")
 
                 Me.InvokeControl(Me.StatusStrip1, Sub()
-                                                      Me.ToolStripStatusLabel_File.Text = String.Format("Uploaded: '{0}'",
+                                                      Me.ToolStripStatusLabel_File.Text = String.Format("Success: {0}",
                                                                   Path.GetFileName(filename))
                                                       Me.ToolStripStatusLabel_File.ForeColor = Color.Gainsboro
                                                   End Sub)
@@ -682,7 +684,7 @@ Namespace UserInterface
             Else
 
                 Me.InvokeControl(Me.StatusStrip1, Sub()
-                                                      Me.ToolStripStatusLabel_File.Text = String.Format("Error: '{0}'",
+                                                      Me.ToolStripStatusLabel_File.Text = String.Format("Error: {0}",
                                                                   Path.GetFileName(filename))
                                                       Me.ToolStripStatusLabel_File.ForeColor = Color.IndianRed
                                                   End Sub)

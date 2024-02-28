@@ -28,12 +28,8 @@ Namespace UserInterface
         Private Sub InitializeComponent()
             Me.components = New System.ComponentModel.Container()
             Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Main))
-            Dim DesignerRectTracker3 As CButtonLib.DesignerRectTracker = New CButtonLib.DesignerRectTracker()
-            Dim CBlendItems2 As CButtonLib.cBlendItems = New CButtonLib.cBlendItems()
-            Dim DesignerRectTracker4 As CButtonLib.DesignerRectTracker = New CButtonLib.DesignerRectTracker()
-            Dim DesignerRectTracker5 As CButtonLib.DesignerRectTracker = New CButtonLib.DesignerRectTracker()
             Dim CBlendItems3 As CButtonLib.cBlendItems = New CButtonLib.cBlendItems()
-            Dim DesignerRectTracker6 As CButtonLib.DesignerRectTracker = New CButtonLib.DesignerRectTracker()
+            Dim CBlendItems1 As CButtonLib.cBlendItems = New CButtonLib.cBlendItems()
             Me.TextBox_Url_Normal = New System.Windows.Forms.TextBox()
             Me.TextBox_Url_SmallThumbnail = New System.Windows.Forms.TextBox()
             Me.TextBox_Url_MediumThumbnail = New System.Windows.Forms.TextBox()
@@ -83,10 +79,10 @@ Namespace UserInterface
             Me.TextBox_Url_Normal.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
             Me.TextBox_Url_Normal.Dock = System.Windows.Forms.DockStyle.Fill
             Me.TextBox_Url_Normal.ForeColor = System.Drawing.Color.YellowGreen
-            Me.TextBox_Url_Normal.Location = New System.Drawing.Point(120, 3)
+            Me.TextBox_Url_Normal.Location = New System.Drawing.Point(118, 3)
             Me.TextBox_Url_Normal.Name = "TextBox_Url_Normal"
             Me.TextBox_Url_Normal.ReadOnly = True
-            Me.TextBox_Url_Normal.Size = New System.Drawing.Size(192, 20)
+            Me.TextBox_Url_Normal.Size = New System.Drawing.Size(190, 20)
             Me.TextBox_Url_Normal.TabIndex = 0
             '
             'TextBox_Url_SmallThumbnail
@@ -95,10 +91,10 @@ Namespace UserInterface
             Me.TextBox_Url_SmallThumbnail.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
             Me.TextBox_Url_SmallThumbnail.Dock = System.Windows.Forms.DockStyle.Fill
             Me.TextBox_Url_SmallThumbnail.ForeColor = System.Drawing.Color.YellowGreen
-            Me.TextBox_Url_SmallThumbnail.Location = New System.Drawing.Point(120, 35)
+            Me.TextBox_Url_SmallThumbnail.Location = New System.Drawing.Point(118, 35)
             Me.TextBox_Url_SmallThumbnail.Name = "TextBox_Url_SmallThumbnail"
             Me.TextBox_Url_SmallThumbnail.ReadOnly = True
-            Me.TextBox_Url_SmallThumbnail.Size = New System.Drawing.Size(192, 20)
+            Me.TextBox_Url_SmallThumbnail.Size = New System.Drawing.Size(190, 20)
             Me.TextBox_Url_SmallThumbnail.TabIndex = 3
             '
             'TextBox_Url_MediumThumbnail
@@ -107,10 +103,10 @@ Namespace UserInterface
             Me.TextBox_Url_MediumThumbnail.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
             Me.TextBox_Url_MediumThumbnail.Dock = System.Windows.Forms.DockStyle.Fill
             Me.TextBox_Url_MediumThumbnail.ForeColor = System.Drawing.Color.YellowGreen
-            Me.TextBox_Url_MediumThumbnail.Location = New System.Drawing.Point(120, 67)
+            Me.TextBox_Url_MediumThumbnail.Location = New System.Drawing.Point(118, 67)
             Me.TextBox_Url_MediumThumbnail.Name = "TextBox_Url_MediumThumbnail"
             Me.TextBox_Url_MediumThumbnail.ReadOnly = True
-            Me.TextBox_Url_MediumThumbnail.Size = New System.Drawing.Size(192, 20)
+            Me.TextBox_Url_MediumThumbnail.Size = New System.Drawing.Size(190, 20)
             Me.TextBox_Url_MediumThumbnail.TabIndex = 4
             '
             'TextBox_Url_LargeThumbnail
@@ -119,10 +115,10 @@ Namespace UserInterface
             Me.TextBox_Url_LargeThumbnail.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
             Me.TextBox_Url_LargeThumbnail.Dock = System.Windows.Forms.DockStyle.Fill
             Me.TextBox_Url_LargeThumbnail.ForeColor = System.Drawing.Color.YellowGreen
-            Me.TextBox_Url_LargeThumbnail.Location = New System.Drawing.Point(120, 99)
+            Me.TextBox_Url_LargeThumbnail.Location = New System.Drawing.Point(118, 99)
             Me.TextBox_Url_LargeThumbnail.Name = "TextBox_Url_LargeThumbnail"
             Me.TextBox_Url_LargeThumbnail.ReadOnly = True
-            Me.TextBox_Url_LargeThumbnail.Size = New System.Drawing.Size(192, 20)
+            Me.TextBox_Url_LargeThumbnail.Size = New System.Drawing.Size(190, 20)
             Me.TextBox_Url_LargeThumbnail.TabIndex = 5
             '
             'Label_Normal
@@ -131,7 +127,7 @@ Namespace UserInterface
             Me.Label_Normal.ForeColor = System.Drawing.Color.Gainsboro
             Me.Label_Normal.Location = New System.Drawing.Point(3, 0)
             Me.Label_Normal.Name = "Label_Normal"
-            Me.Label_Normal.Size = New System.Drawing.Size(111, 20)
+            Me.Label_Normal.Size = New System.Drawing.Size(109, 20)
             Me.Label_Normal.TabIndex = 0
             Me.Label_Normal.Text = "Normal"
             Me.Label_Normal.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -142,7 +138,7 @@ Namespace UserInterface
             Me.Label_SmallThumbnail.ForeColor = System.Drawing.Color.Gainsboro
             Me.Label_SmallThumbnail.Location = New System.Drawing.Point(3, 32)
             Me.Label_SmallThumbnail.Name = "Label_SmallThumbnail"
-            Me.Label_SmallThumbnail.Size = New System.Drawing.Size(111, 20)
+            Me.Label_SmallThumbnail.Size = New System.Drawing.Size(109, 20)
             Me.Label_SmallThumbnail.TabIndex = 3
             Me.Label_SmallThumbnail.Text = "Small Thumbnail"
             Me.Label_SmallThumbnail.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -153,7 +149,7 @@ Namespace UserInterface
             Me.Label_MediumThumbnail.ForeColor = System.Drawing.Color.Gainsboro
             Me.Label_MediumThumbnail.Location = New System.Drawing.Point(3, 64)
             Me.Label_MediumThumbnail.Name = "Label_MediumThumbnail"
-            Me.Label_MediumThumbnail.Size = New System.Drawing.Size(111, 20)
+            Me.Label_MediumThumbnail.Size = New System.Drawing.Size(109, 20)
             Me.Label_MediumThumbnail.TabIndex = 4
             Me.Label_MediumThumbnail.Text = "Medium Thumbnail"
             Me.Label_MediumThumbnail.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -164,7 +160,7 @@ Namespace UserInterface
             Me.Label_LargeThumbnail.ForeColor = System.Drawing.Color.Gainsboro
             Me.Label_LargeThumbnail.Location = New System.Drawing.Point(3, 96)
             Me.Label_LargeThumbnail.Name = "Label_LargeThumbnail"
-            Me.Label_LargeThumbnail.Size = New System.Drawing.Size(111, 20)
+            Me.Label_LargeThumbnail.Size = New System.Drawing.Size(109, 20)
             Me.Label_LargeThumbnail.TabIndex = 5
             Me.Label_LargeThumbnail.Text = "Large Thumbnail"
             Me.Label_LargeThumbnail.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -175,7 +171,7 @@ Namespace UserInterface
             Me.Label_HugeThumbnail.ForeColor = System.Drawing.Color.Gainsboro
             Me.Label_HugeThumbnail.Location = New System.Drawing.Point(3, 128)
             Me.Label_HugeThumbnail.Name = "Label_HugeThumbnail"
-            Me.Label_HugeThumbnail.Size = New System.Drawing.Size(111, 20)
+            Me.Label_HugeThumbnail.Size = New System.Drawing.Size(109, 20)
             Me.Label_HugeThumbnail.TabIndex = 6
             Me.Label_HugeThumbnail.Text = "Huge Thumbnail"
             Me.Label_HugeThumbnail.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -186,15 +182,16 @@ Namespace UserInterface
             Me.TextBox_Url_HugeThumbnail.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
             Me.TextBox_Url_HugeThumbnail.Dock = System.Windows.Forms.DockStyle.Fill
             Me.TextBox_Url_HugeThumbnail.ForeColor = System.Drawing.Color.YellowGreen
-            Me.TextBox_Url_HugeThumbnail.Location = New System.Drawing.Point(120, 131)
+            Me.TextBox_Url_HugeThumbnail.Location = New System.Drawing.Point(118, 131)
             Me.TextBox_Url_HugeThumbnail.Name = "TextBox_Url_HugeThumbnail"
             Me.TextBox_Url_HugeThumbnail.ReadOnly = True
-            Me.TextBox_Url_HugeThumbnail.Size = New System.Drawing.Size(192, 20)
+            Me.TextBox_Url_HugeThumbnail.Size = New System.Drawing.Size(190, 20)
             Me.TextBox_Url_HugeThumbnail.TabIndex = 6
             '
             'Panel_Urls
             '
-            Me.Panel_Urls.Anchor = System.Windows.Forms.AnchorStyles.None
+            Me.Panel_Urls.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
             Me.Panel_Urls.BackColor = System.Drawing.Color.Transparent
             Me.Panel_Urls.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
             Me.Panel_Urls.Controls.Add(Me.TableLayoutPanel1)
@@ -210,7 +207,7 @@ Namespace UserInterface
             Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 37.10247!))
             Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 62.89753!))
             Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 23.0!))
-            Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 31.0!))
+            Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 35.0!))
             Me.TableLayoutPanel1.Controls.Add(Me.Label_Markdown_Normal, 0, 7)
             Me.TableLayoutPanel1.Controls.Add(Me.TextBox_Markdown_Normal, 0, 7)
             Me.TableLayoutPanel1.Controls.Add(Me.Button_Clip_Markdown_Normal, 0, 7)
@@ -260,7 +257,7 @@ Namespace UserInterface
             Me.Label_Markdown_Normal.ForeColor = System.Drawing.Color.Gainsboro
             Me.Label_Markdown_Normal.Location = New System.Drawing.Point(3, 224)
             Me.Label_Markdown_Normal.Name = "Label_Markdown_Normal"
-            Me.Label_Markdown_Normal.Size = New System.Drawing.Size(111, 20)
+            Me.Label_Markdown_Normal.Size = New System.Drawing.Size(109, 20)
             Me.Label_Markdown_Normal.TabIndex = 29
             Me.Label_Markdown_Normal.Text = "Markdown"
             Me.Label_Markdown_Normal.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -271,10 +268,10 @@ Namespace UserInterface
             Me.TextBox_Markdown_Normal.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
             Me.TextBox_Markdown_Normal.Dock = System.Windows.Forms.DockStyle.Fill
             Me.TextBox_Markdown_Normal.ForeColor = System.Drawing.Color.YellowGreen
-            Me.TextBox_Markdown_Normal.Location = New System.Drawing.Point(120, 227)
+            Me.TextBox_Markdown_Normal.Location = New System.Drawing.Point(118, 227)
             Me.TextBox_Markdown_Normal.Name = "TextBox_Markdown_Normal"
             Me.TextBox_Markdown_Normal.ReadOnly = True
-            Me.TextBox_Markdown_Normal.Size = New System.Drawing.Size(192, 20)
+            Me.TextBox_Markdown_Normal.Size = New System.Drawing.Size(190, 20)
             Me.TextBox_Markdown_Normal.TabIndex = 28
             '
             'Button_Clip_Markdown_Normal
@@ -286,7 +283,7 @@ Namespace UserInterface
             Me.Button_Clip_Markdown_Normal.FlatAppearance.BorderSize = 0
             Me.Button_Clip_Markdown_Normal.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(CType(CType(58, Byte), Integer), CType(CType(58, Byte), Integer), CType(CType(56, Byte), Integer))
             Me.Button_Clip_Markdown_Normal.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-            Me.Button_Clip_Markdown_Normal.Location = New System.Drawing.Point(318, 227)
+            Me.Button_Clip_Markdown_Normal.Location = New System.Drawing.Point(314, 227)
             Me.Button_Clip_Markdown_Normal.Name = "Button_Clip_Markdown_Normal"
             Me.Button_Clip_Markdown_Normal.Size = New System.Drawing.Size(17, 19)
             Me.Button_Clip_Markdown_Normal.TabIndex = 27
@@ -299,7 +296,7 @@ Namespace UserInterface
             Me.Label_BBCode_Thumbnail.ForeColor = System.Drawing.Color.Gainsboro
             Me.Label_BBCode_Thumbnail.Location = New System.Drawing.Point(3, 192)
             Me.Label_BBCode_Thumbnail.Name = "Label_BBCode_Thumbnail"
-            Me.Label_BBCode_Thumbnail.Size = New System.Drawing.Size(111, 20)
+            Me.Label_BBCode_Thumbnail.Size = New System.Drawing.Size(109, 20)
             Me.Label_BBCode_Thumbnail.TabIndex = 22
             Me.Label_BBCode_Thumbnail.Text = "BBCode (Thumbnail)"
             Me.Label_BBCode_Thumbnail.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -313,7 +310,7 @@ Namespace UserInterface
             Me.Button_Url_Normal.FlatAppearance.BorderSize = 0
             Me.Button_Url_Normal.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(CType(CType(58, Byte), Integer), CType(CType(58, Byte), Integer), CType(CType(56, Byte), Integer))
             Me.Button_Url_Normal.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-            Me.Button_Url_Normal.Location = New System.Drawing.Point(341, 3)
+            Me.Button_Url_Normal.Location = New System.Drawing.Point(337, 3)
             Me.Button_Url_Normal.Name = "Button_Url_Normal"
             Me.Button_Url_Normal.Size = New System.Drawing.Size(19, 19)
             Me.Button_Url_Normal.TabIndex = 7
@@ -329,7 +326,7 @@ Namespace UserInterface
             Me.Button_Clip_Normal.FlatAppearance.BorderSize = 0
             Me.Button_Clip_Normal.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(CType(CType(58, Byte), Integer), CType(CType(58, Byte), Integer), CType(CType(56, Byte), Integer))
             Me.Button_Clip_Normal.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-            Me.Button_Clip_Normal.Location = New System.Drawing.Point(318, 3)
+            Me.Button_Clip_Normal.Location = New System.Drawing.Point(314, 3)
             Me.Button_Clip_Normal.Name = "Button_Clip_Normal"
             Me.Button_Clip_Normal.Size = New System.Drawing.Size(17, 19)
             Me.Button_Clip_Normal.TabIndex = 14
@@ -345,7 +342,7 @@ Namespace UserInterface
             Me.Button_Clip_SmallThumbnail.FlatAppearance.BorderSize = 0
             Me.Button_Clip_SmallThumbnail.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(CType(CType(58, Byte), Integer), CType(CType(58, Byte), Integer), CType(CType(56, Byte), Integer))
             Me.Button_Clip_SmallThumbnail.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-            Me.Button_Clip_SmallThumbnail.Location = New System.Drawing.Point(318, 35)
+            Me.Button_Clip_SmallThumbnail.Location = New System.Drawing.Point(314, 35)
             Me.Button_Clip_SmallThumbnail.Name = "Button_Clip_SmallThumbnail"
             Me.Button_Clip_SmallThumbnail.Size = New System.Drawing.Size(17, 19)
             Me.Button_Clip_SmallThumbnail.TabIndex = 17
@@ -361,7 +358,7 @@ Namespace UserInterface
             Me.Button_Url_SmallThumbnail.FlatAppearance.BorderSize = 0
             Me.Button_Url_SmallThumbnail.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(CType(CType(58, Byte), Integer), CType(CType(58, Byte), Integer), CType(CType(56, Byte), Integer))
             Me.Button_Url_SmallThumbnail.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-            Me.Button_Url_SmallThumbnail.Location = New System.Drawing.Point(341, 35)
+            Me.Button_Url_SmallThumbnail.Location = New System.Drawing.Point(337, 35)
             Me.Button_Url_SmallThumbnail.Name = "Button_Url_SmallThumbnail"
             Me.Button_Url_SmallThumbnail.Size = New System.Drawing.Size(19, 19)
             Me.Button_Url_SmallThumbnail.TabIndex = 10
@@ -377,7 +374,7 @@ Namespace UserInterface
             Me.Button_Clip_MediumThumbnail.FlatAppearance.BorderSize = 0
             Me.Button_Clip_MediumThumbnail.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(CType(CType(58, Byte), Integer), CType(CType(58, Byte), Integer), CType(CType(56, Byte), Integer))
             Me.Button_Clip_MediumThumbnail.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-            Me.Button_Clip_MediumThumbnail.Location = New System.Drawing.Point(318, 67)
+            Me.Button_Clip_MediumThumbnail.Location = New System.Drawing.Point(314, 67)
             Me.Button_Clip_MediumThumbnail.Name = "Button_Clip_MediumThumbnail"
             Me.Button_Clip_MediumThumbnail.Size = New System.Drawing.Size(17, 19)
             Me.Button_Clip_MediumThumbnail.TabIndex = 20
@@ -393,7 +390,7 @@ Namespace UserInterface
             Me.Button_Url_MediumThumbnail.FlatAppearance.BorderSize = 0
             Me.Button_Url_MediumThumbnail.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(CType(CType(58, Byte), Integer), CType(CType(58, Byte), Integer), CType(CType(56, Byte), Integer))
             Me.Button_Url_MediumThumbnail.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-            Me.Button_Url_MediumThumbnail.Location = New System.Drawing.Point(341, 67)
+            Me.Button_Url_MediumThumbnail.Location = New System.Drawing.Point(337, 67)
             Me.Button_Url_MediumThumbnail.Name = "Button_Url_MediumThumbnail"
             Me.Button_Url_MediumThumbnail.Size = New System.Drawing.Size(19, 19)
             Me.Button_Url_MediumThumbnail.TabIndex = 11
@@ -409,7 +406,7 @@ Namespace UserInterface
             Me.Button_Url_LargeThumbnail.FlatAppearance.BorderSize = 0
             Me.Button_Url_LargeThumbnail.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(CType(CType(58, Byte), Integer), CType(CType(58, Byte), Integer), CType(CType(56, Byte), Integer))
             Me.Button_Url_LargeThumbnail.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-            Me.Button_Url_LargeThumbnail.Location = New System.Drawing.Point(341, 99)
+            Me.Button_Url_LargeThumbnail.Location = New System.Drawing.Point(337, 99)
             Me.Button_Url_LargeThumbnail.Name = "Button_Url_LargeThumbnail"
             Me.Button_Url_LargeThumbnail.Size = New System.Drawing.Size(19, 19)
             Me.Button_Url_LargeThumbnail.TabIndex = 12
@@ -425,7 +422,7 @@ Namespace UserInterface
             Me.Button_Url_HugeThumbnail.FlatAppearance.BorderSize = 0
             Me.Button_Url_HugeThumbnail.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(CType(CType(58, Byte), Integer), CType(CType(58, Byte), Integer), CType(CType(56, Byte), Integer))
             Me.Button_Url_HugeThumbnail.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-            Me.Button_Url_HugeThumbnail.Location = New System.Drawing.Point(341, 131)
+            Me.Button_Url_HugeThumbnail.Location = New System.Drawing.Point(337, 131)
             Me.Button_Url_HugeThumbnail.Name = "Button_Url_HugeThumbnail"
             Me.Button_Url_HugeThumbnail.Size = New System.Drawing.Size(19, 19)
             Me.Button_Url_HugeThumbnail.TabIndex = 13
@@ -441,7 +438,7 @@ Namespace UserInterface
             Me.Button_Clip_LargeThumbnail.FlatAppearance.BorderSize = 0
             Me.Button_Clip_LargeThumbnail.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(CType(CType(58, Byte), Integer), CType(CType(58, Byte), Integer), CType(CType(56, Byte), Integer))
             Me.Button_Clip_LargeThumbnail.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-            Me.Button_Clip_LargeThumbnail.Location = New System.Drawing.Point(318, 99)
+            Me.Button_Clip_LargeThumbnail.Location = New System.Drawing.Point(314, 99)
             Me.Button_Clip_LargeThumbnail.Name = "Button_Clip_LargeThumbnail"
             Me.Button_Clip_LargeThumbnail.Size = New System.Drawing.Size(17, 19)
             Me.Button_Clip_LargeThumbnail.TabIndex = 19
@@ -457,7 +454,7 @@ Namespace UserInterface
             Me.Button_Clip_HugeThumbnail.FlatAppearance.BorderSize = 0
             Me.Button_Clip_HugeThumbnail.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(CType(CType(58, Byte), Integer), CType(CType(58, Byte), Integer), CType(CType(56, Byte), Integer))
             Me.Button_Clip_HugeThumbnail.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-            Me.Button_Clip_HugeThumbnail.Location = New System.Drawing.Point(318, 131)
+            Me.Button_Clip_HugeThumbnail.Location = New System.Drawing.Point(314, 131)
             Me.Button_Clip_HugeThumbnail.Name = "Button_Clip_HugeThumbnail"
             Me.Button_Clip_HugeThumbnail.Size = New System.Drawing.Size(17, 19)
             Me.Button_Clip_HugeThumbnail.TabIndex = 18
@@ -470,7 +467,7 @@ Namespace UserInterface
             Me.Label_BBCode_Normal.ForeColor = System.Drawing.Color.Gainsboro
             Me.Label_BBCode_Normal.Location = New System.Drawing.Point(3, 160)
             Me.Label_BBCode_Normal.Name = "Label_BBCode_Normal"
-            Me.Label_BBCode_Normal.Size = New System.Drawing.Size(111, 20)
+            Me.Label_BBCode_Normal.Size = New System.Drawing.Size(109, 20)
             Me.Label_BBCode_Normal.TabIndex = 21
             Me.Label_BBCode_Normal.Text = "BBCode"
             Me.Label_BBCode_Normal.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -484,7 +481,7 @@ Namespace UserInterface
             Me.Button_Clip_BBCode_Normal.FlatAppearance.BorderSize = 0
             Me.Button_Clip_BBCode_Normal.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(CType(CType(58, Byte), Integer), CType(CType(58, Byte), Integer), CType(CType(56, Byte), Integer))
             Me.Button_Clip_BBCode_Normal.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-            Me.Button_Clip_BBCode_Normal.Location = New System.Drawing.Point(318, 163)
+            Me.Button_Clip_BBCode_Normal.Location = New System.Drawing.Point(314, 163)
             Me.Button_Clip_BBCode_Normal.Name = "Button_Clip_BBCode_Normal"
             Me.Button_Clip_BBCode_Normal.Size = New System.Drawing.Size(17, 19)
             Me.Button_Clip_BBCode_Normal.TabIndex = 23
@@ -500,7 +497,7 @@ Namespace UserInterface
             Me.Button_Clip_BBCode_Thumbnail.FlatAppearance.BorderSize = 0
             Me.Button_Clip_BBCode_Thumbnail.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(CType(CType(58, Byte), Integer), CType(CType(58, Byte), Integer), CType(CType(56, Byte), Integer))
             Me.Button_Clip_BBCode_Thumbnail.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-            Me.Button_Clip_BBCode_Thumbnail.Location = New System.Drawing.Point(318, 195)
+            Me.Button_Clip_BBCode_Thumbnail.Location = New System.Drawing.Point(314, 195)
             Me.Button_Clip_BBCode_Thumbnail.Name = "Button_Clip_BBCode_Thumbnail"
             Me.Button_Clip_BBCode_Thumbnail.Size = New System.Drawing.Size(17, 19)
             Me.Button_Clip_BBCode_Thumbnail.TabIndex = 24
@@ -513,10 +510,10 @@ Namespace UserInterface
             Me.TextBox_BBCode_Normal.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
             Me.TextBox_BBCode_Normal.Dock = System.Windows.Forms.DockStyle.Fill
             Me.TextBox_BBCode_Normal.ForeColor = System.Drawing.Color.YellowGreen
-            Me.TextBox_BBCode_Normal.Location = New System.Drawing.Point(120, 163)
+            Me.TextBox_BBCode_Normal.Location = New System.Drawing.Point(118, 163)
             Me.TextBox_BBCode_Normal.Name = "TextBox_BBCode_Normal"
             Me.TextBox_BBCode_Normal.ReadOnly = True
-            Me.TextBox_BBCode_Normal.Size = New System.Drawing.Size(192, 20)
+            Me.TextBox_BBCode_Normal.Size = New System.Drawing.Size(190, 20)
             Me.TextBox_BBCode_Normal.TabIndex = 25
             '
             'TextBox_BBCode_Thumbnail
@@ -525,10 +522,10 @@ Namespace UserInterface
             Me.TextBox_BBCode_Thumbnail.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
             Me.TextBox_BBCode_Thumbnail.Dock = System.Windows.Forms.DockStyle.Fill
             Me.TextBox_BBCode_Thumbnail.ForeColor = System.Drawing.Color.YellowGreen
-            Me.TextBox_BBCode_Thumbnail.Location = New System.Drawing.Point(120, 195)
+            Me.TextBox_BBCode_Thumbnail.Location = New System.Drawing.Point(118, 195)
             Me.TextBox_BBCode_Thumbnail.Name = "TextBox_BBCode_Thumbnail"
             Me.TextBox_BBCode_Thumbnail.ReadOnly = True
-            Me.TextBox_BBCode_Thumbnail.Size = New System.Drawing.Size(192, 20)
+            Me.TextBox_BBCode_Thumbnail.Size = New System.Drawing.Size(190, 20)
             Me.TextBox_BBCode_Thumbnail.TabIndex = 26
             '
             'OpenFileDialog_BrowseImage
@@ -562,23 +559,19 @@ Namespace UserInterface
             '
             'CButton_BrowseImage
             '
-            Me.CButton_BrowseImage.Anchor = System.Windows.Forms.AnchorStyles.None
+            Me.CButton_BrowseImage.Anchor = CType(((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
             Me.CButton_BrowseImage.BorderColor = System.Drawing.Color.Black
-            DesignerRectTracker3.IsActive = False
-            DesignerRectTracker3.TrackerRectangle = CType(resources.GetObject("DesignerRectTracker3.TrackerRectangle"), System.Drawing.RectangleF)
-            Me.CButton_BrowseImage.CenterPtTracker = DesignerRectTracker3
-            CBlendItems2.iColor = New System.Drawing.Color() {System.Drawing.Color.FromArgb(CType(CType(134, Byte), Integer), CType(CType(197, Byte), Integer), CType(CType(31, Byte), Integer)), System.Drawing.Color.FromArgb(CType(CType(134, Byte), Integer), CType(CType(197, Byte), Integer), CType(CType(31, Byte), Integer)), System.Drawing.Color.FromArgb(CType(CType(134, Byte), Integer), CType(CType(197, Byte), Integer), CType(CType(31, Byte), Integer))}
-            CBlendItems2.iPoint = New Single() {0!, 0.5!, 1.0!}
-            Me.CButton_BrowseImage.ColorFillBlend = CBlendItems2
+            CBlendItems3.iColor = New System.Drawing.Color() {System.Drawing.Color.FromArgb(CType(CType(134, Byte), Integer), CType(CType(197, Byte), Integer), CType(CType(31, Byte), Integer)), System.Drawing.Color.FromArgb(CType(CType(134, Byte), Integer), CType(CType(197, Byte), Integer), CType(CType(31, Byte), Integer)), System.Drawing.Color.FromArgb(CType(CType(134, Byte), Integer), CType(CType(197, Byte), Integer), CType(CType(31, Byte), Integer))}
+            CBlendItems3.iPoint = New Single() {0!, 0.5!, 1.0!}
+            Me.CButton_BrowseImage.ColorFillBlend = CBlendItems3
             Me.CButton_BrowseImage.Corners.All = 2
             Me.CButton_BrowseImage.Corners.LowerLeft = 2
             Me.CButton_BrowseImage.Corners.LowerRight = 2
             Me.CButton_BrowseImage.Corners.UpperLeft = 2
             Me.CButton_BrowseImage.Corners.UpperRight = 2
             Me.CButton_BrowseImage.Cursor = System.Windows.Forms.Cursors.Hand
-            DesignerRectTracker4.IsActive = False
-            DesignerRectTracker4.TrackerRectangle = CType(resources.GetObject("DesignerRectTracker4.TrackerRectangle"), System.Drawing.RectangleF)
-            Me.CButton_BrowseImage.FocusPtTracker = DesignerRectTracker4
+            Me.CButton_BrowseImage.DesignerSelected = False
             Me.CButton_BrowseImage.Font = New System.Drawing.Font("Arial", 14.0!, System.Drawing.FontStyle.Bold)
             Me.CButton_BrowseImage.ForeColor = System.Drawing.Color.Black
             Me.CButton_BrowseImage.ImageIndex = 0
@@ -592,23 +585,19 @@ Namespace UserInterface
             '
             'CButton_Abort
             '
-            Me.CButton_Abort.Anchor = System.Windows.Forms.AnchorStyles.None
+            Me.CButton_Abort.Anchor = CType(((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
             Me.CButton_Abort.BorderColor = System.Drawing.Color.Black
-            DesignerRectTracker5.IsActive = False
-            DesignerRectTracker5.TrackerRectangle = CType(resources.GetObject("DesignerRectTracker5.TrackerRectangle"), System.Drawing.RectangleF)
-            Me.CButton_Abort.CenterPtTracker = DesignerRectTracker5
-            CBlendItems3.iColor = New System.Drawing.Color() {System.Drawing.Color.Crimson, System.Drawing.Color.Crimson, System.Drawing.Color.Crimson}
-            CBlendItems3.iPoint = New Single() {0!, 0.5!, 1.0!}
-            Me.CButton_Abort.ColorFillBlend = CBlendItems3
+            CBlendItems1.iColor = New System.Drawing.Color() {System.Drawing.Color.Crimson, System.Drawing.Color.Crimson, System.Drawing.Color.Crimson}
+            CBlendItems1.iPoint = New Single() {0!, 0.5!, 1.0!}
+            Me.CButton_Abort.ColorFillBlend = CBlendItems1
             Me.CButton_Abort.Corners.All = 2
             Me.CButton_Abort.Corners.LowerLeft = 2
             Me.CButton_Abort.Corners.LowerRight = 2
             Me.CButton_Abort.Corners.UpperLeft = 2
             Me.CButton_Abort.Corners.UpperRight = 2
             Me.CButton_Abort.Cursor = System.Windows.Forms.Cursors.Hand
-            DesignerRectTracker6.IsActive = False
-            DesignerRectTracker6.TrackerRectangle = CType(resources.GetObject("DesignerRectTracker6.TrackerRectangle"), System.Drawing.RectangleF)
-            Me.CButton_Abort.FocusPtTracker = DesignerRectTracker6
+            Me.CButton_Abort.DesignerSelected = False
             Me.CButton_Abort.Font = New System.Drawing.Font("Arial", 14.0!, System.Drawing.FontStyle.Bold)
             Me.CButton_Abort.ForeColor = System.Drawing.Color.WhiteSmoke
             Me.CButton_Abort.ImageIndex = 0
@@ -623,7 +612,9 @@ Namespace UserInterface
             '
             'PictureBox_Logo
             '
-            Me.PictureBox_Logo.Anchor = System.Windows.Forms.AnchorStyles.None
+            Me.PictureBox_Logo.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
             Me.PictureBox_Logo.BackgroundImage = Global.ImgurUploader.My.Resources.Resources.Logo
             Me.PictureBox_Logo.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom
             Me.PictureBox_Logo.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
@@ -645,12 +636,10 @@ Namespace UserInterface
             Me.Controls.Add(Me.PictureBox_Logo)
             Me.Controls.Add(Me.CButton_BrowseImage)
             Me.Controls.Add(Me.CButton_Abort)
-            Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
             Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
-            Me.MaximizeBox = False
             Me.Name = "Main"
             Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
-            Me.Text = "Imgur Uploader.Net v1.3 by ElektroStudios"
+            Me.Text = "Imgur Uploader.Net v1.4 by ElektroStudios"
             Me.Panel_Urls.ResumeLayout(False)
             Me.TableLayoutPanel1.ResumeLayout(False)
             Me.TableLayoutPanel1.PerformLayout()
