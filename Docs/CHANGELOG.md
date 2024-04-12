@@ -1,6 +1,10 @@
 # Imgur Uploader.NET Change Log 📋
 
-## v1.4 (2024) *(current)* 🆕
+## v1.4.1 (2024) *(current)* 🆕
+#### 🛠️ Fixes:
+    • Copy button for Markdow format was copying BBCode url instead.
+
+## v1.4 (2024) 🔄
 #### 🛠️ Fixes:
     • The program hangs during the image upload procedure (on Release mode).
 #### 🌟 Improvements:
