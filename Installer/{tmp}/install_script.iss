@@ -1,6 +1,6 @@
 
 
-#define Version "1.4"
+#define Version "1.4.1"
 #define AppName "Imgur Uploader"
 #define ExeName "ImgurUploader"
 #define StartMenuGroup "• ElektroStudios"
@@ -97,7 +97,8 @@ Source: {commoncf}\Inno Setup\*; DestDir: {commoncf}\Inno Setup; Attribs: readon
 Source: {tmp}\*; DestDir: {tmp}; Flags: recursesubdirs createallsubdirs ignoreversion deleteafterinstall
 
 ; Program
-Source: {app}\*; DestDir: {app}; Flags: recursesubdirs createallsubdirs ignoreversion
+Source: {app}\*; DestDir: {app}; Excludes: ImgurUploader.ini; Flags: recursesubdirs createallsubdirs ignoreversion
+Source: {app}\ImgurUploader.ini; DestDir: {app}; Flags: onlyifdoesntexist
 
 [Registry]
 ; ContextMenu Integration
