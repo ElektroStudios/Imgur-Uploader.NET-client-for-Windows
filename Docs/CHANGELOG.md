@@ -1,4 +1,4 @@
-# Imgur Uploader.NET Change Log 📋
+﻿# Imgur Uploader.NET Change Log 📋
 
 ## v1.4.1 (2024) *(current)* 🆕
 #### 🛠️ Fixes:
