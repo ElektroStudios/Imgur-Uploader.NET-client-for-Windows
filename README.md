@@ -21,7 +21,7 @@ winforms
  -->
 
 <div align="center">
-  <img src="/Images/App.png" width="100" alt="Logo">
+  <img src="/Images/App.ico" width="100" alt="Logo">
   
   <h1>Imgur Uploader.NET</h1>
 
