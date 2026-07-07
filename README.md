@@ -75,11 +75,11 @@ Uploading local images to Imgur usually requires opening a web browser, navigati
 
 ## 🖼️ Screenshots
 
-![](Images/Imgur%20Uploader.NET%2001.png)
-
-![](Images/Imgur%20Uploader.NET%2002.png)
-
 <p align="center">
+  <img src="Images/Imgur%20Uploader.NET%2001.png" alt="Screenshot 1" width="98%">
+  <br>
+  <img src="Images/Imgur%20Uploader.NET%2002.png" alt="Screenshot 2" width="98%">
+  <br>
   <img src="Images/Imgur%20Uploader.NET%2003.png" alt="Screenshot 3" width="48%"> <img src="Images/Imgur%20Uploader.NET%2004.png" alt="Screenshot 4" width="48%">
 </p>
 
