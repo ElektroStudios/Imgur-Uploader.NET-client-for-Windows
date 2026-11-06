@@ -2,7 +2,7 @@
 
 ## v2.1 *(current)* 🆕
 
-### New Features
+#### 🚀 New Features:
 - Images can now be uploaded to the user's own Imgur account using OAuth 2 authorization (PIN flow). Previously, all uploads were anonymous.
 - The "Upload" button is now a split button that shows the current destination ("Upload to my account" / "Upload anonymously"). The drop-down menu lets you switch between both modes and sign in or out of Imgur.
 - New sign-in dialog that guides the user through the Imgur authorization and PIN entry.
@@ -11,14 +11,9 @@
 - The drop-down arrow area of the split button is now wider to prevent misclicks, and the button supports a custom color.
 - Added a check mark to the active option in the dark context menus.
 
-### Fixes
+#### 🛠️ Fixes:
 - Fixed images always being uploaded anonymously, even though the application was intended to use the user's account.
 - If Imgur rejects the stored authorization, the account is cleared and the user is prompted to sign in again instead of the upload failing repeatedly.
-
-### Other Changes
-- Added unit tests for the token parsing, the account storage and the new UI controls.
-- README: documented the required Imgur application registration type ("OAuth 2 authorization without a callback URL") and the account authorization flow.
-- Added references to System.Security and System.Web.Extensions.
 
 ## v2.0 (2026) 🔄
 
