@@ -98,6 +98,8 @@ To use Imgur Uploader.NET, you need a Imgur's API key. To request your API key f
 
  - https://apidocs.imgur.com/#register
 
+When registering your application, choose the authorization type **OAuth 2 authorization without a callback URL**. This is required to upload images to your own Imgur account; an application registered only for anonymous usage can upload images anonymously, but it cannot be authorized to use your account.
+
 ### API key configuration
 
 Once you have requested your API key on Imgur's website, just open the **ImgurUploader.ini** file and fill the missing values with your settings:
@@ -107,6 +109,22 @@ Once you have requested your API key on Imgur's website, just open the **ImgurUp
     ClientSecret=(Your client secret)
     
 These steps are necessary in order to use Imgur Uploader.NET.
+
+### Account authorization
+
+The first time that you upload an image to your account, the program asks you to authorize it:
+
+1. Click **Open page**. Sign in to Imgur if needed and click **Allow**. Imgur will show you a PIN.
+2. Paste the PIN in the program and click **Authorize**.
+
+You only have to do this once. The authorization is saved in your Windows user profile (`%APPDATA%\ElektroStudios\Imgur Uploader.NET\Account.dat`), and it is encrypted, so only your Windows user account can use it on your computer.
+
+The arrow of the **Upload** button lets you choose how images are uploaded, and your choice is remembered:
+
+- **Upload to my account**: the image is uploaded to your Imgur account (this is the default).
+- **Upload anonymously**: the image is not linked to any Imgur account.
+
+The same menu lets you sign out (or sign in without uploading an image). To revoke the access of the application completely, remove it from the applications that are connected to your account in the Imgur settings.
 
 ## 🔄 Change Log
 

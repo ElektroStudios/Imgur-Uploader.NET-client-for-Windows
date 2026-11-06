@@ -31,6 +31,7 @@ Namespace UserInterface.CustomControls
         Private Shared ReadOnly ItemHoverColor As Color = Color.FromArgb(66, 66, 70)
         Private Shared ReadOnly ItemTextColor As Color = Color.Gainsboro
         Private Shared ReadOnly ItemDisabledTextColor As Color = Color.FromArgb(110, 110, 110)
+        Private Shared ReadOnly CheckMarkColor As Color = Color.FromArgb(134, 197, 31)
 
 #End Region
 
@@ -96,6 +97,33 @@ Namespace UserInterface.CustomControls
 
             e.TextColor = If(e.Item.Enabled, ItemTextColor, ItemDisabledTextColor)
             MyBase.OnRenderItemText(e)
+
+        End Sub
+
+        ''' <summary>
+        ''' Draws the check mark of a checked <see cref="ToolStripMenuItem"/>
+        ''' (only visible when the menu shows its check margin).
+        ''' </summary>
+        ''' <param name="e">A <see cref="ToolStripItemImageRenderEventArgs"/> that contains the event data.</param>
+        Protected Overrides Sub OnRenderItemCheck(e As ToolStripItemImageRenderEventArgs)
+
+            Dim g As Graphics = e.Graphics
+            Dim previousMode As SmoothingMode = g.SmoothingMode
+            g.SmoothingMode = SmoothingMode.AntiAlias
+
+            Dim cx As Single = e.ImageRectangle.X + (e.ImageRectangle.Width / 2.0F)
+            Dim cy As Single = e.ImageRectangle.Y + (e.ImageRectangle.Height / 2.0F)
+
+            Using pen As New Pen(If(e.Item.Enabled, CheckMarkColor, ItemDisabledTextColor), 2.0F)
+                pen.StartCap = LineCap.Round
+                pen.EndCap = LineCap.Round
+                pen.LineJoin = LineJoin.Round
+                g.DrawLines(pen, New PointF() {New PointF(cx - 4.0F, cy),
+                                               New PointF(cx - 1.0F, cy + 3.0F),
+                                               New PointF(cx + 4.5F, cy - 3.5F)})
+            End Using
+
+            g.SmoothingMode = previousMode
 
         End Sub
 

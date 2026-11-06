@@ -71,6 +71,31 @@ Namespace UserInterface
         Private currentImage As ImgurImage
 
         ''' <summary>
+        ''' The way the next image will be uploaded: anonymously, or to the account of the user.
+        ''' </summary>
+        Private uploadMode As ImgurUploadMode = ImgurUploadMode.Account
+
+        ''' <summary>
+        ''' The drop-down menu of the upload button, which allows to choose the <see cref="Main.uploadMode"/>.
+        ''' </summary>
+        Private uploadMenu As ContextMenuStrip
+
+        ''' <summary>
+        ''' The menu item that selects <see cref="ImgurUploadMode.Account"/>.
+        ''' </summary>
+        Private menuItemUploadToAccount As ToolStripMenuItem
+
+        ''' <summary>
+        ''' The menu item that selects <see cref="ImgurUploadMode.Anonymous"/>.
+        ''' </summary>
+        Private menuItemUploadAnonymously As ToolStripMenuItem
+
+        ''' <summary>
+        ''' The menu item that signs in to (or signs out of) the imgur account.
+        ''' </summary>
+        Private menuItemAccountAction As ToolStripMenuItem
+
+        ''' <summary>
         ''' The persistent status-bar text (the one that is restored after a transient message).
         ''' </summary>
         Private statusText As String = "Ready"
@@ -136,6 +161,8 @@ Namespace UserInterface
             Me.InitializeSelectors()
             Me.SetToolTips()
             Me.SetClientIds()
+            Me.InitializeUploadMenu()
+            Me.LoadAccount()
 
         End Sub
 
@@ -235,14 +262,91 @@ Namespace UserInterface
         End Sub
 
         ''' <summary>
-        ''' Handles the ClickButtonArea event of the CButton_Upload control.
+        ''' Handles the MainAreaClick event of the Button_Upload control.
+        ''' Uploads the selected image using the current upload mode (the arrow of the button changes it).
         ''' </summary>
         ''' <param name="sender">The source of the event.</param>
-        ''' <param name="e">The <see cref="MouseEventArgs"/> instance containing the event data.</param>
-        Private Sub CButton_Upload_ClickButtonArea(sender As Object, e As MouseEventArgs) _
-        Handles CButton_Upload.ClickButtonArea
+        ''' <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        Private Sub Button_Upload_MainAreaClick(sender As Object, e As EventArgs) _
+        Handles Button_Upload.MainAreaClick
 
             Me.StartUpload()
+
+        End Sub
+
+        ''' <summary>
+        ''' Handles the Opening event of the upload menu.
+        ''' Refreshes the check marks and the texts that depend on the account.
+        ''' </summary>
+        ''' <param name="sender">The source of the event.</param>
+        ''' <param name="e">The <see cref="System.ComponentModel.CancelEventArgs"/> instance containing the event data.</param>
+        Private Sub UploadMenu_Opening(sender As Object, e As System.ComponentModel.CancelEventArgs)
+
+            Dim isSignedIn As Boolean = Me.ImgurClient.IsAuthorized
+
+            Me.menuItemUploadToAccount.Checked = (Me.uploadMode = ImgurUploadMode.Account)
+            Me.menuItemUploadAnonymously.Checked = (Me.uploadMode = ImgurUploadMode.Anonymous)
+
+            Me.menuItemUploadToAccount.Text = If(isSignedIn,
+                                                 $"Upload to my account ({Me.AccountName})",
+                                                 "Upload to my account (sign-in required)")
+
+            Me.menuItemAccountAction.Text = If(isSignedIn,
+                                               $"Sign out ({Me.AccountName})",
+                                               "Sign in to Imgur...")
+
+        End Sub
+
+        ''' <summary>
+        ''' Handles the Click event of the "Upload to my account" menu item.
+        ''' </summary>
+        ''' <param name="sender">The source of the event.</param>
+        ''' <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        Private Sub MenuItemUploadToAccount_Click(sender As Object, e As EventArgs)
+
+            Me.SetUploadMode(ImgurUploadMode.Account)
+
+        End Sub
+
+        ''' <summary>
+        ''' Handles the Click event of the "Upload anonymously" menu item.
+        ''' </summary>
+        ''' <param name="sender">The source of the event.</param>
+        ''' <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        Private Sub MenuItemUploadAnonymously_Click(sender As Object, e As EventArgs)
+
+            Me.SetUploadMode(ImgurUploadMode.Anonymous)
+
+        End Sub
+
+        ''' <summary>
+        ''' Handles the Click event of the "Sign in / Sign out" menu item.
+        ''' </summary>
+        ''' <param name="sender">The source of the event.</param>
+        ''' <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        Private Sub MenuItemAccountAction_Click(sender As Object, e As EventArgs)
+
+            If Me.ImgurClient.IsAuthorized Then
+                Me.SignOutAccount()
+
+            ElseIf Me.SignIn() Then
+                Me.SetUploadMode(ImgurUploadMode.Account)
+
+            End If
+
+        End Sub
+
+        ''' <summary>
+        ''' Handles the OnAccountTokensChanged event of the imgurClient.
+        ''' Stores the account, so the user does not have to authorize the application again.
+        ''' This event can be raised from a background thread.
+        ''' </summary>
+        ''' <param name="sender">The source of the event.</param>
+        ''' <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        Private Sub ImgurClient_OnAccountTokensChanged(sender As Object, e As EventArgs) _
+        Handles ImgurClient.OnAccountTokensChanged
+
+            Me.StoreAccount()
 
         End Sub
 
@@ -460,13 +564,186 @@ Namespace UserInterface
         Private Sub SetToolTips()
 
             Me.ToolTip_Actions.SetToolTip(Me.CButton_BrowseImage, "Select an image file (you can also drag and drop it onto the window).")
-            Me.ToolTip_Actions.SetToolTip(Me.CButton_Upload, "Upload the selected image to Imgur.")
+            ' (The tooltip of the upload button depends on the upload mode: see UpdateUploadModeUi.)
             Me.ToolTip_Actions.SetToolTip(Me.Selector_Size, "Select which image size to use (not used by the Share Link, HTML Embed and Markdown formats).")
             Me.ToolTip_Actions.SetToolTip(Me.Selector_Format, "Select the output format.")
             Me.ToolTip_Actions.SetToolTip(Me.Button_Copy, "Copy the result to the clipboard.")
             Me.ToolTip_Actions.SetToolTip(Me.Button_Open, "Open the URL in the default browser (Direct URL and Share Link formats only).")
 
         End Sub
+
+        ''' <summary>
+        ''' Gets the Imgur user name of the authorized account, or a generic text if it is unknown.
+        ''' </summary>
+        Private ReadOnly Property AccountName As String
+            Get
+                Dim name As String = Me.ImgurClient.AccountUsername
+                Return If(String.IsNullOrEmpty(name), "unknown user", name)
+            End Get
+        End Property
+
+        ''' <summary>
+        ''' Creates the drop-down menu of the upload button.
+        ''' </summary>
+        Private Sub InitializeUploadMenu()
+
+            Me.menuItemUploadToAccount = New ToolStripMenuItem("Upload to my account")
+            Me.menuItemUploadAnonymously = New ToolStripMenuItem("Upload anonymously")
+            Me.menuItemAccountAction = New ToolStripMenuItem("Sign in to Imgur...")
+
+            AddHandler Me.menuItemUploadToAccount.Click, AddressOf Me.MenuItemUploadToAccount_Click
+            AddHandler Me.menuItemUploadAnonymously.Click, AddressOf Me.MenuItemUploadAnonymously_Click
+            AddHandler Me.menuItemAccountAction.Click, AddressOf Me.MenuItemAccountAction_Click
+
+            Me.uploadMenu = New ContextMenuStrip(Me.components) With {
+                .BackColor = Color.FromArgb(37, 37, 38),
+                .ForeColor = Color.Gainsboro,
+                .Renderer = New DarkMenuRenderer(),
+                .ShowCheckMargin = True,
+                .ShowImageMargin = False
+            }
+
+            Me.uploadMenu.Items.AddRange(New ToolStripItem() {Me.menuItemUploadToAccount,
+                                                              Me.menuItemUploadAnonymously,
+                                                              New ToolStripSeparator(),
+                                                              Me.menuItemAccountAction})
+
+            AddHandler Me.uploadMenu.Opening, AddressOf Me.UploadMenu_Opening
+
+            Me.Button_Upload.DropDownMenu = Me.uploadMenu
+
+        End Sub
+
+        ''' <summary>
+        ''' Loads the preferred upload mode and the account that authorized the application in a previous session.
+        ''' </summary>
+        Private Sub LoadAccount()
+
+            Me.uploadMode = UserAccountStore.LoadUploadMode()
+
+            Dim refreshToken As String = Nothing
+            Dim username As String = Nothing
+
+            If UserAccountStore.TryLoadAccount(refreshToken, username) Then
+                Me.ImgurClient.RestoreAccount(refreshToken, username)
+            End If
+
+            Me.UpdateUploadModeUi()
+
+        End Sub
+
+        ''' <summary>
+        ''' Stores the authorized account in the profile of the user.
+        ''' This method is thread-safe.
+        ''' </summary>
+        Private Sub StoreAccount()
+
+            If Not Me.ImgurClient.IsAuthorized Then
+                Return
+            End If
+
+            If Not UserAccountStore.SaveAccount(Me.ImgurClient.RefreshToken, Me.ImgurClient.AccountUsername) Then
+                Me.SetStatus("The account could not be saved on this computer: you will have to sign in again the next time.", Color.Orange)
+            End If
+
+        End Sub
+
+        ''' <summary>
+        ''' Changes the upload mode and remembers it.
+        ''' </summary>
+        ''' <param name="mode">The new upload mode.</param>
+        Private Sub SetUploadMode(mode As ImgurUploadMode)
+
+            Me.uploadMode = mode
+            UserAccountStore.SaveUploadMode(mode)
+            Me.UpdateUploadModeUi()
+
+        End Sub
+
+        ''' <summary>
+        ''' Updates the text and the tooltip of the upload button, according to the upload mode and the account.
+        ''' This method must be called from the UI thread.
+        ''' </summary>
+        Private Sub UpdateUploadModeUi()
+
+            Dim tip As String
+
+            If Me.uploadMode = ImgurUploadMode.Account Then
+
+                Me.Button_Upload.Text = "Upload to my account"
+
+                If Me.ImgurClient.IsAuthorized Then
+                    tip = $"Upload the selected image to your Imgur account ({Me.AccountName}). Use the arrow to change the mode or to sign out."
+                Else
+                    tip = "Upload the selected image to your Imgur account. You will be asked to authorize the application first. Use the arrow to change the mode."
+                End If
+
+            Else
+                Me.Button_Upload.Text = "Upload anonymously"
+                tip = "Upload the selected image anonymously: it will not be linked to any Imgur account. Use the arrow to change the mode."
+
+            End If
+
+            Me.ToolTip_Actions.SetToolTip(Me.Button_Upload, tip)
+
+        End Sub
+
+        ''' <summary>
+        ''' Shows the authorization dialog, so the user allows the application to upload images to his Imgur account.
+        ''' </summary>
+        ''' <returns>
+        ''' <see langword="True"/> if the application was authorized; <see langword="False"/> if the user canceled.
+        ''' </returns>
+        Private Function SignIn() As Boolean
+
+            Using dialog As New AuthorizationDialog(Me.ImgurClient)
+
+                If dialog.ShowDialog(Me) <> DialogResult.OK Then
+                    Return False
+                End If
+
+            End Using
+
+            ' (The account is stored when the tokens change, but this makes sure it is also stored if they did not.)
+            Me.StoreAccount()
+            Me.UpdateUploadModeUi()
+            Me.SetStatus($"Signed in to Imgur as {Me.AccountName}.", Color.YellowGreen, transient:=True)
+
+            Return True
+
+        End Function
+
+        ''' <summary>
+        ''' Forgets the authorized account.
+        ''' </summary>
+        Private Sub SignOutAccount()
+
+            Dim name As String = Me.AccountName
+
+            Me.ImgurClient.SignOut()
+            UserAccountStore.ClearAccount()
+            Me.UpdateUploadModeUi()
+
+            MessageBox.Show($"The account '{name}' was removed from this computer." & Environment.NewLine & Environment.NewLine &
+                            "To revoke the access of this application completely, remove it from the applications connected to your account in the Imgur settings.",
+                            Me.Text, MessageBoxButtons.OK, MessageBoxIcon.Information)
+
+        End Sub
+
+        ''' <summary>
+        ''' Describes where an image is uploaded to, for the status bar.
+        ''' </summary>
+        ''' <param name="mode">The upload mode.</param>
+        ''' <returns>The description.</returns>
+        Private Function DescribeDestination(mode As ImgurUploadMode) As String
+
+            If mode = ImgurUploadMode.Account Then
+                Return $"to your account ({Me.AccountName})"
+            End If
+
+            Return "anonymously"
+
+        End Function
 
         ''' <summary>
         ''' Reads the INI file to retrieve and set the 'ClientId' and 'ClientSecret'.
@@ -631,7 +908,7 @@ Namespace UserInterface
         ''' </summary>
         Private Sub UpdateUploadButton()
 
-            Me.CButton_Upload.Enabled = (Me.pendingFile IsNot Nothing)
+            Me.Button_Upload.Enabled = (Me.pendingFile IsNot Nothing)
 
         End Sub
 
@@ -697,10 +974,20 @@ Namespace UserInterface
 
             End If
 
+            ' Uploading to the account requires that the user has authorized the application.
+            ' This is asked after the checks above, so the user is not asked to authorize an image that cannot be uploaded.
+            Dim mode As ImgurUploadMode = Me.uploadMode
+
+            If (mode = ImgurUploadMode.Account) AndAlso Not Me.ImgurClient.IsAuthorized Then
+                If Not Me.SignIn() Then
+                    Return
+                End If
+            End If
+
             Me.currentImage = Nothing
             Me.UpdateResult()
             Me.CButton_BrowseImage.Enabled = False
-            Me.CButton_Upload.Hide()
+            Me.Button_Upload.Hide()
             Me.CButton_Abort.Enabled = True
             Me.CButton_Abort.Show()
 
@@ -715,7 +1002,7 @@ Namespace UserInterface
             Me.uploadTaskCTSource = New CancellationTokenSource
             Me.uploadTaskCT = Me.uploadTaskCTSource.Token
             Me.uploadTask = Task.Factory.StartNew(Sub()
-                                                      Me.UploadImage(sourcePath, compress, maxFileSize, Me.uploadTaskCT)
+                                                      Me.UploadImage(sourcePath, compress, maxFileSize, mode, Me.uploadTaskCT)
                                                   End Sub, Me.uploadTaskCT)
 
         End Sub
@@ -746,8 +1033,9 @@ Namespace UserInterface
         ''' <param name="filename">The filename.</param>
         ''' <param name="compress"><see langword="True"/> to compress the image (as JPEG) before uploading it.</param>
         ''' <param name="maxFileSize">The maximum file size, in bytes, of the compressed image.</param>
+        ''' <param name="mode">The upload mode: anonymously, or to the account of the user.</param>
         ''' <param name="ct">The Task CancellationToken.</param>
-        Private Sub UploadImage(filename As String, compress As Boolean, maxFileSize As Long, ct As CancellationToken)
+        Private Sub UploadImage(filename As String, compress As Boolean, maxFileSize As Long, mode As ImgurUploadMode, ct As CancellationToken)
 
             Me.InvokeControl(Me, Sub(x As Form) x.AllowDrop = False)
 
@@ -767,10 +1055,10 @@ Namespace UserInterface
                 Dim urls As ImgurImage = Nothing
 
                 If Not ct.IsCancellationRequested Then
-                    Me.SetStatus($"Uploading: {displayName}...", Color.Gainsboro)
+                    Me.SetStatus($"Uploading {Me.DescribeDestination(mode)}: {displayName}...", Color.Gainsboro)
 
                     Using ct.Register(Sub() Me.ImgurClient.UploadImageAsyncCancel())
-                        urls = Me.ImgurClient.UploadImageAsync(fileToUpload)
+                        urls = Me.ImgurClient.UploadImageAsync(fileToUpload, mode)
                     End Using
                 End If
 
@@ -780,7 +1068,7 @@ Namespace UserInterface
 
                 ElseIf urls IsNot Nothing Then
                     Me.InvokeControl(Me, Sub(x As Form) Me.ShowResults(urls))
-                    Me.SetStatus($"Success: {displayName}", Color.Gainsboro)
+                    Me.SetStatus($"Success: {displayName} (uploaded {Me.DescribeDestination(mode)})", Color.Gainsboro)
 
                 ElseIf Me.statusColor <> Color.IndianRed Then
                     ' (When Imgur reported a specific error, its message is already in the status bar.)
@@ -791,6 +1079,19 @@ Namespace UserInterface
                     Me.InvokeControl(Me, Sub(x As Form) Me.RestoreIdleState())
 
                 End If
+
+            Catch ex As ImgurAuthorizationException
+                ' Imgur no longer accepts the saved authorization (the user revoked it): the user must authorize again.
+                Me.ImgurClient.SignOut()
+                UserAccountStore.ClearAccount()
+                Me.SetStatus($"Authorization lost: {displayName}", Color.IndianRed)
+                Me.InvokeControl(Me, Sub(x As Form)
+                                         MessageBox.Show(x,
+                                                         $"Imgur no longer accepts the saved authorization of your account.{Environment.NewLine}{Environment.NewLine}{ex.Message}{Environment.NewLine}{Environment.NewLine}Click Upload again to authorize the application again.",
+                                                         x.Text, MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                                         Me.UpdateUploadModeUi()
+                                         Me.RestoreIdleState()
+                                     End Sub)
 
             Catch ex As Exception
                 ' An exception must never escape from a background task: the UI would remain in the "uploading" state forever.
@@ -830,7 +1131,7 @@ Namespace UserInterface
         Private Sub RestoreIdleState()
 
             Me.CButton_Abort.Hide()
-            Me.CButton_Upload.Show()
+            Me.Button_Upload.Show()
             Me.CButton_BrowseImage.Enabled = True
             Me.UpdateUploadButton()
             Me.AllowDrop = True

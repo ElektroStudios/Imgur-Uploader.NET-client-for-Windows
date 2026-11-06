@@ -31,9 +31,9 @@ Namespace UserInterface.CustomControls
 #Region " Constants "
 
         ''' <summary>
-        ''' The width of the arrow area, in pixels.
+        ''' The default width of the arrow area, in pixels.
         ''' </summary>
-        Private Const ArrowAreaWidth As Integer = 26
+        Private Const DefaultArrowAreaWidth As Integer = 26
 
         ''' <summary>
         ''' The corner radius of the button, in pixels.
@@ -129,6 +129,16 @@ Namespace UserInterface.CustomControls
         ''' </summary>
         Private centerTextValue As Boolean
 
+        ''' <summary>
+        ''' Backing field of <see cref="DropDownActionButton.ArrowAreaWidth"/>.
+        ''' </summary>
+        Private arrowAreaWidthValue As Integer = DefaultArrowAreaWidth
+
+        ''' <summary>
+        ''' Backing field of <see cref="DropDownActionButton.ButtonColor"/>.
+        ''' </summary>
+        Private buttonColorValue As Color = Color.Empty
+
 #End Region
 
 #Region " Properties "
@@ -213,6 +223,66 @@ Namespace UserInterface.CustomControls
         End Property
 
         ''' <summary>
+        ''' Gets or sets the width, in pixels, of the arrow area.
+        ''' A wide arrow area makes it harder to click it by mistake when the main area is clicked frequently.
+        ''' </summary>
+        ''' <exception cref="ArgumentOutOfRangeException">
+        ''' The value is less than 12.
+        ''' </exception>
+        <Category("Appearance")>
+        <Description("The width, in pixels, of the arrow area.")>
+        <DefaultValue(DefaultArrowAreaWidth)>
+        Public Property ArrowAreaWidth As Integer
+            Get
+                Return Me.arrowAreaWidthValue
+            End Get
+            Set(value As Integer)
+                If value < 12 Then
+                    Throw New ArgumentOutOfRangeException(NameOf(value), value, "The arrow area must be at least 12 pixels wide.")
+                End If
+                If Me.arrowAreaWidthValue <> value Then
+                    Me.arrowAreaWidthValue = value
+                    Me.hoverZone = HitZone.None
+                    Me.Invalidate()
+                End If
+            End Set
+        End Property
+
+        ''' <summary>
+        ''' Gets or sets the fill color of the button. If it is <see cref="Color.Empty"/> (the default),
+        ''' the neutral dark theme colors are used; otherwise the hover, pressed and border colors are derived from it.
+        ''' Set <see cref="Control.ForeColor"/> to a color that contrasts with it.
+        ''' </summary>
+        <Category("Appearance")>
+        <Description("The fill color of the button. Empty uses the neutral dark theme.")>
+        Public Property ButtonColor As Color
+            Get
+                Return Me.buttonColorValue
+            End Get
+            Set(value As Color)
+                If Me.buttonColorValue <> value Then
+                    Me.buttonColorValue = value
+                    Me.Invalidate()
+                End If
+            End Set
+        End Property
+
+        ''' <summary>
+        ''' Determines whether the designer must serialize the <see cref="DropDownActionButton.ButtonColor"/> property.
+        ''' </summary>
+        ''' <returns><see langword="True"/> if the property must be serialized; otherwise, <see langword="False"/>.</returns>
+        Private Function ShouldSerializeButtonColor() As Boolean
+            Return Not Me.buttonColorValue.IsEmpty
+        End Function
+
+        ''' <summary>
+        ''' Resets the <see cref="DropDownActionButton.ButtonColor"/> property to its default value.
+        ''' </summary>
+        Private Sub ResetButtonColor()
+            Me.ButtonColor = Color.Empty
+        End Sub
+
+        ''' <summary>
         ''' Determines whether the designer must serialize the <see cref="DropDownActionButton.DropDownMenu"/> property.
         ''' </summary>
         ''' <returns><see langword="True"/> if the property must be serialized; otherwise, <see langword="False"/>.</returns>
@@ -290,7 +360,7 @@ Namespace UserInterface.CustomControls
             Dim arrowBounds As Rectangle = Rectangle.Empty
 
             If Me.hasDropDownValue Then
-                arrowBounds = New Rectangle(Me.Width - ArrowAreaWidth, 0, ArrowAreaWidth, Me.Height)
+                arrowBounds = New Rectangle(Me.Width - Me.arrowAreaWidthValue, 0, Me.arrowAreaWidthValue, Me.Height)
             End If
 
             Dim mainBounds As New Rectangle(0, 0, Me.Width - arrowBounds.Width, Me.Height)
@@ -307,7 +377,7 @@ Namespace UserInterface.CustomControls
             Using path As GraphicsPath = DropDownActionButton.CreateRoundedPath(outline, CornerRadius)
 
                 ' Base fill.
-                Using baseBrush As New SolidBrush(If(isEnabledNow, BaseFillColor, DisabledFillColor))
+                Using baseBrush As New SolidBrush(If(isEnabledNow, Me.GetBaseFillColor(), DisabledFillColor))
                     g.FillPath(baseBrush, path)
                 End Using
 
@@ -321,17 +391,17 @@ Namespace UserInterface.CustomControls
 
                 ' Divider between the main area and the arrow area.
                 If Me.hasDropDownValue AndAlso Not isSelectorMode Then
-                    Using dividerPen As New Pen(BorderColor)
+                    Using dividerPen As New Pen(Me.GetBorderColor())
                         g.DrawLine(dividerPen, arrowBounds.X, 5, arrowBounds.X, Me.Height - 6)
                     End Using
                 End If
 
                 ' Border.
-                Dim borderToUse As Color = BorderColor
+                Dim borderToUse As Color = Me.GetBorderColor()
                 If isEnabledNow AndAlso Me.Focused AndAlso Me.ShowFocusCues Then
-                    borderToUse = AccentColor
+                    borderToUse = If(Me.HasButtonColor, MixColors(Me.buttonColorValue, Color.White, 0.6F), AccentColor)
                 ElseIf isEnabledNow AndAlso (Me.hoverZone <> HitZone.None OrElse Me.isMenuOpen) Then
-                    borderToUse = HoverBorderColor
+                    borderToUse = If(Me.HasButtonColor, MixColors(Me.buttonColorValue, Color.White, 0.35F), HoverBorderColor)
                 End If
 
                 Using borderPen As New Pen(borderToUse)
@@ -352,7 +422,11 @@ Namespace UserInterface.CustomControls
             If Me.hasDropDownValue Then
                 Dim glyphColor As Color = DisabledTextColor
                 If isEnabledNow Then
-                    glyphColor = If(Me.hoverZone = HitZone.ArrowArea OrElse Me.isMenuOpen, AccentColor, Color.Gainsboro)
+                    If Me.HasButtonColor Then
+                        glyphColor = Me.ForeColor
+                    Else
+                        glyphColor = If(Me.hoverZone = HitZone.ArrowArea OrElse Me.isMenuOpen, AccentColor, Color.Gainsboro)
+                    End If
                 End If
 
                 Dim cx As Single = arrowBounds.X + (arrowBounds.Width / 2.0F)
@@ -383,14 +457,14 @@ Namespace UserInterface.CustomControls
             End If
 
             Dim hasFill As Boolean = True
-            Dim fillColor As Color = HoverFillColor
+            Dim fillColor As Color = Me.GetHoverFillColor()
 
             If Me.pressedZone = zone AndAlso Me.hoverZone = zone Then
-                fillColor = PressedFillColor
+                fillColor = Me.GetPressedFillColor()
             ElseIf zone = HitZone.ArrowArea AndAlso Me.isMenuOpen Then
-                fillColor = PressedFillColor
+                fillColor = Me.GetPressedFillColor()
             ElseIf Me.hoverZone = zone Then
-                fillColor = HoverFillColor
+                fillColor = Me.GetHoverFillColor()
             Else
                 hasFill = False
             End If
@@ -593,11 +667,63 @@ Namespace UserInterface.CustomControls
                 Return HitZone.ArrowArea
             End If
 
-            If Me.hasDropDownValue AndAlso (location.X >= (Me.Width - ArrowAreaWidth)) Then
+            If Me.hasDropDownValue AndAlso (location.X >= (Me.Width - Me.arrowAreaWidthValue)) Then
                 Return HitZone.ArrowArea
             End If
 
             Return HitZone.MainArea
+
+        End Function
+
+        ''' <summary>
+        ''' Gets a value indicating whether a custom <see cref="DropDownActionButton.ButtonColor"/> is set.
+        ''' </summary>
+        Private ReadOnly Property HasButtonColor As Boolean
+            Get
+                Return Not Me.buttonColorValue.IsEmpty
+            End Get
+        End Property
+
+        ''' <summary>
+        ''' Gets the fill color of the enabled button.
+        ''' </summary>
+        Private Function GetBaseFillColor() As Color
+            Return If(Me.HasButtonColor, Me.buttonColorValue, BaseFillColor)
+        End Function
+
+        ''' <summary>
+        ''' Gets the fill color of the zone under the mouse cursor.
+        ''' </summary>
+        Private Function GetHoverFillColor() As Color
+            Return If(Me.HasButtonColor, MixColors(Me.buttonColorValue, Color.White, 0.18F), HoverFillColor)
+        End Function
+
+        ''' <summary>
+        ''' Gets the fill color of the pressed zone.
+        ''' </summary>
+        Private Function GetPressedFillColor() As Color
+            Return If(Me.HasButtonColor, MixColors(Me.buttonColorValue, Color.Black, 0.22F), PressedFillColor)
+        End Function
+
+        ''' <summary>
+        ''' Gets the border (and divider) color of the button, when it is not hovered nor focused.
+        ''' </summary>
+        Private Function GetBorderColor() As Color
+            Return If(Me.HasButtonColor AndAlso Me.Enabled, MixColors(Me.buttonColorValue, Color.Black, 0.35F), BorderColor)
+        End Function
+
+        ''' <summary>
+        ''' Mixes two colors.
+        ''' </summary>
+        ''' <param name="baseColor">The base color.</param>
+        ''' <param name="mixColor">The color that is mixed in.</param>
+        ''' <param name="amount">The proportion of <paramref name="mixColor"/>, from 0 to 1.</param>
+        ''' <returns>The resulting opaque color.</returns>
+        Private Shared Function MixColors(baseColor As Color, mixColor As Color, amount As Single) As Color
+
+            Return Color.FromArgb(CInt(CInt(baseColor.R) + ((CInt(mixColor.R) - CInt(baseColor.R)) * amount)),
+                                  CInt(CInt(baseColor.G) + ((CInt(mixColor.G) - CInt(baseColor.G)) * amount)),
+                                  CInt(CInt(baseColor.B) + ((CInt(mixColor.B) - CInt(baseColor.B)) * amount)))
 
         End Function
 

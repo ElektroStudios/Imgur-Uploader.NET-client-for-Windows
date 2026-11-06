@@ -28,13 +28,12 @@ Namespace UserInterface
             Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Main))
             Dim CBlendItems1 As CButtonLib.cBlendItems = New CButtonLib.cBlendItems()
             Dim CBlendItems2 As CButtonLib.cBlendItems = New CButtonLib.cBlendItems()
-            Dim CBlendItems3 As CButtonLib.cBlendItems = New CButtonLib.cBlendItems()
             Me.OpenFileDialog_BrowseImage = New System.Windows.Forms.OpenFileDialog()
             Me.StatusStrip1 = New System.Windows.Forms.StatusStrip()
             Me.ToolStripStatusLabel_File = New System.Windows.Forms.ToolStripStatusLabel()
             Me.ToolStripStatusLabel_GitHub = New System.Windows.Forms.ToolStripStatusLabel()
             Me.CButton_BrowseImage = New CButtonLib.CButton()
-            Me.CButton_Upload = New CButtonLib.CButton()
+            Me.Button_Upload = New ImgurUploader.UserInterface.CustomControls.DropDownActionButton()
             Me.CButton_Abort = New CButtonLib.CButton()
             Me.TableLayoutPanel_Buttons = New System.Windows.Forms.TableLayoutPanel()
             Me.Panel_Upload = New System.Windows.Forms.Panel()
@@ -125,38 +124,29 @@ Namespace UserInterface
             Me.CButton_BrowseImage.TextShadow = System.Drawing.Color.Black
             Me.CButton_BrowseImage.TextShadowShow = False
             '
-            'CButton_Upload
+            'Button_Upload
             '
-            Me.CButton_Upload.BorderColor = System.Drawing.Color.Black
-            CBlendItems2.iColor = New System.Drawing.Color() {System.Drawing.Color.FromArgb(CType(CType(134, Byte), Integer), CType(CType(197, Byte), Integer), CType(CType(31, Byte), Integer)), System.Drawing.Color.FromArgb(CType(CType(134, Byte), Integer), CType(CType(197, Byte), Integer), CType(CType(31, Byte), Integer)), System.Drawing.Color.FromArgb(CType(CType(134, Byte), Integer), CType(CType(197, Byte), Integer), CType(CType(31, Byte), Integer))}
-            CBlendItems2.iPoint = New Single() {0!, 0.5!, 1.0!}
-            Me.CButton_Upload.ColorFillBlend = CBlendItems2
-            Me.CButton_Upload.Corners.All = 2
-            Me.CButton_Upload.Corners.LowerLeft = 2
-            Me.CButton_Upload.Corners.LowerRight = 2
-            Me.CButton_Upload.Corners.UpperLeft = 2
-            Me.CButton_Upload.Corners.UpperRight = 2
-            Me.CButton_Upload.Cursor = System.Windows.Forms.Cursors.Hand
-            Me.CButton_Upload.DesignerSelected = False
-            Me.CButton_Upload.Dock = System.Windows.Forms.DockStyle.Fill
-            Me.CButton_Upload.Enabled = False
-            Me.CButton_Upload.Font = New System.Drawing.Font("Arial", 14.0!, System.Drawing.FontStyle.Bold)
-            Me.CButton_Upload.ForeColor = System.Drawing.Color.Black
-            Me.CButton_Upload.ImageIndex = 0
-            Me.CButton_Upload.Location = New System.Drawing.Point(3, 3)
-            Me.CButton_Upload.Name = "CButton_Upload"
-            Me.CButton_Upload.Size = New System.Drawing.Size(265, 32)
-            Me.CButton_Upload.TabIndex = 1
-            Me.CButton_Upload.Text = "Upload image"
-            Me.CButton_Upload.TextShadow = System.Drawing.Color.Black
-            Me.CButton_Upload.TextShadowShow = False
+            Me.Button_Upload.ArrowAreaWidth = 40
+            Me.Button_Upload.BackColor = System.Drawing.Color.FromArgb(CType(CType(26, Byte), Integer), CType(CType(26, Byte), Integer), CType(CType(26, Byte), Integer))
+            Me.Button_Upload.ButtonColor = System.Drawing.Color.FromArgb(CType(CType(134, Byte), Integer), CType(CType(197, Byte), Integer), CType(CType(31, Byte), Integer))
+            Me.Button_Upload.CenterText = True
+            Me.Button_Upload.Cursor = System.Windows.Forms.Cursors.Hand
+            Me.Button_Upload.Dock = System.Windows.Forms.DockStyle.Fill
+            Me.Button_Upload.Enabled = False
+            Me.Button_Upload.Font = New System.Drawing.Font("Arial", 14.0!, System.Drawing.FontStyle.Bold)
+            Me.Button_Upload.ForeColor = System.Drawing.Color.Black
+            Me.Button_Upload.Location = New System.Drawing.Point(3, 3)
+            Me.Button_Upload.Name = "Button_Upload"
+            Me.Button_Upload.Size = New System.Drawing.Size(265, 32)
+            Me.Button_Upload.TabIndex = 1
+            Me.Button_Upload.Text = "Upload to my account"
             '
             'CButton_Abort
             '
             Me.CButton_Abort.BorderColor = System.Drawing.Color.Black
-            CBlendItems3.iColor = New System.Drawing.Color() {System.Drawing.Color.Crimson, System.Drawing.Color.Crimson, System.Drawing.Color.Crimson}
-            CBlendItems3.iPoint = New Single() {0!, 0.5!, 1.0!}
-            Me.CButton_Abort.ColorFillBlend = CBlendItems3
+            CBlendItems2.iColor = New System.Drawing.Color() {System.Drawing.Color.Crimson, System.Drawing.Color.Crimson, System.Drawing.Color.Crimson}
+            CBlendItems2.iPoint = New Single() {0!, 0.5!, 1.0!}
+            Me.CButton_Abort.ColorFillBlend = CBlendItems2
             Me.CButton_Abort.Corners.All = 2
             Me.CButton_Abort.Corners.LowerLeft = 2
             Me.CButton_Abort.Corners.LowerRight = 2
@@ -197,7 +187,7 @@ Namespace UserInterface
             'Panel_Upload
             '
             Me.Panel_Upload.BackColor = System.Drawing.Color.Transparent
-            Me.Panel_Upload.Controls.Add(Me.CButton_Upload)
+            Me.Panel_Upload.Controls.Add(Me.Button_Upload)
             Me.Panel_Upload.Controls.Add(Me.CButton_Abort)
             Me.Panel_Upload.Dock = System.Windows.Forms.DockStyle.Fill
             Me.Panel_Upload.Location = New System.Drawing.Point(271, 0)
@@ -395,7 +385,7 @@ Namespace UserInterface
         Friend WithEvents ToolStripStatusLabel_File As System.Windows.Forms.ToolStripStatusLabel
         Friend WithEvents ToolStripStatusLabel_GitHub As System.Windows.Forms.ToolStripStatusLabel
         Friend WithEvents CButton_BrowseImage As CButtonLib.CButton
-        Friend WithEvents CButton_Upload As CButtonLib.CButton
+        Friend WithEvents Button_Upload As Global.ImgurUploader.UserInterface.CustomControls.DropDownActionButton
         Friend WithEvents CButton_Abort As CButtonLib.CButton
         Friend WithEvents TableLayoutPanel_Buttons As System.Windows.Forms.TableLayoutPanel
         Friend WithEvents Panel_Upload As System.Windows.Forms.Panel
