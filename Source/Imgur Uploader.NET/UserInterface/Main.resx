@@ -118,13 +118,19 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <metadata name="OpenFileDialog_BrowseImage.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>12, 17</value>
+    <value>314, 17</value>
   </metadata>
   <data name="OpenFileDialog_BrowseImage.Filter" xml:space="preserve">
     <value>All supported formats|*.BMP;*.JPG;*.JPEG;*.GIF;*.PNG;*.APNG;*.TIFF;*.PDF;*.XCF|Bitmap Images|*.BMP|JPEG Images|*.JPG;*.JPEG|GIF Images|*.GIF|PNG Images|*.PNG|APNG Images|*.APNG|TIFF Images|*.TIFF|PDF Files|*.PDF|XCF Images|*.XCF</value>
   </data>
   <metadata name="StatusStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>226, 17</value>
+    <value>525, 17</value>
+  </metadata>
+  <metadata name="ToolTip_Actions.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>17, 17</value>
+  </metadata>
+  <metadata name="Timer_StatusRestore.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>154, 17</value>
   </metadata>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">

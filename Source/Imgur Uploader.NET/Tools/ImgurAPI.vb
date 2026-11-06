@@ -1,4 +1,4 @@
-﻿
+
 #Region " Option Statements "
 
 Option Strict On
@@ -255,6 +255,16 @@ Namespace Tools
         ''' <param name="e">The <see cref="UploadValuesCompletedEventArgs"/> instance containing the event data.</param>
         Private Sub WC_UploadValuesCompleted(sender As Object, e As UploadValuesCompletedEventArgs)
 
+            ' A user abort is not an error: the upload loop detects the cancellation and returns.
+            Dim wasCanceled As Boolean =
+                e.Cancelled OrElse
+                (TypeOf e.Error Is WebException AndAlso
+                 DirectCast(e.Error, WebException).Status = WebExceptionStatus.RequestCanceled)
+
+            If wasCanceled Then
+                Exit Sub
+            End If
+
             If e.Error IsNot Nothing Then
 
                 If TypeOf (e.Error.InnerException) Is ObjectDisposedException Then
@@ -463,12 +473,16 @@ Namespace Tools
 
                             Dim serverResponse As String = sr.ReadToEnd
                             Dim xdoc As New XDocument(XDocument.Parse(serverResponse))
-                            ' Dim status As ImgurStatus = Nothing
+                            Dim status As ImgurStatus = Me.GetResultFromStatus(Convert.ToInt32(xdoc.Root.Attribute("status").Value))
 
-                            ' status = Me.GetResultFromStatus(Convert.ToInt32(xdoc.Root.LastAttribute.Value.ToString))
+                            If status <> ImgurStatus.Success Then
+                                Me.RaiseStatusEvent(status)
+                                Return Nothing
+                            End If
 
-                            RaiseEvent OnAsyncSuccess(Me, New ImgurImage(New Uri(xdoc.Descendants("link").Value)))
-                            Return New ImgurImage(New Uri(xdoc.Descendants("link").Value))
+                            Dim uploadedImage As New ImgurImage(New Uri(xdoc.Descendants("link").Value))
+                            RaiseEvent OnAsyncSuccess(Me, uploadedImage)
+                            Return uploadedImage
 
                             '    Select Case status
 
@@ -535,7 +549,7 @@ Namespace Tools
         Public Shared Function GetThumbnail(imageUrl As Uri,
 thumbnail As ThumbnailType) As String
 
-            Return String.Format("http://i.imgur.com/{0}{1}{2}",
+            Return String.Format("https://i.imgur.com/{0}{1}{2}",
                                  Path.GetFileNameWithoutExtension(imageUrl.AbsoluteUri),
                                  ImgurAPI.thumbnailKeys(thumbnail.ToString),
                                  Path.GetExtension(imageUrl.AbsoluteUri))
@@ -547,10 +561,38 @@ thumbnail As ThumbnailType) As String
 #Region " Private Methods "
 
         ''' <summary>
-        ''' Gets the result from status.
+        ''' Raises the event that corresponds to the specified imgur status.
         ''' </summary>
-        ''' <param name="Status">The status.</param>
-        ''' <returns>imgurStatus.</returns>
+        ''' <param name="status">The imgur status.</param>
+        Private Sub RaiseStatusEvent(status As ImgurStatus)
+
+            Select Case status
+
+                Case ImgurStatus.AccessForbidden
+                    RaiseEvent OnAccessForbidden(Me, status)
+
+                Case ImgurStatus.AuthorizationFailed
+                    RaiseEvent OnAuthorizationFailed(Me, status)
+
+                Case ImgurStatus.BadImageFormat
+                    RaiseEvent OnBadImageFormat(Me, status)
+
+                Case ImgurStatus.InternalServerError
+                    RaiseEvent OnInternalServerError(Me, status)
+
+                Case ImgurStatus.PageIsNotFound
+                    RaiseEvent OnPageIsNotFound(Me, status)
+
+                Case ImgurStatus.UploadRateLimitError
+                    RaiseEvent OnUploadRateLimitError(Me, status)
+
+                Case Else
+                    RaiseEvent OnUnknownError(Me, status)
+
+            End Select
+
+        End Sub
+
         Private Function GetResultFromStatus(status As Integer) As ImgurStatus
 
             Dim statusCode As ImgurStatus = ImgurStatus.UnknownError
@@ -584,7 +626,14 @@ thumbnail As ThumbnailType) As String
         ''' </summary>
         ''' <param name="ImageUrl">Indicates the url of the uploaded image.</param>
         Public Sub New(imageUrl As Uri)
-            Me.imageUrl = imageUrl
+
+            If imageUrl Is Nothing Then
+                Throw New ArgumentNullException(NameOf(imageUrl))
+            End If
+
+            ' Imgur still returns 'http' links for some responses; always use HTTPS.
+            Dim builder As New UriBuilder(imageUrl) With {.Scheme = Uri.UriSchemeHttps, .Port = -1}
+            Me.imageUrl = builder.Uri
         End Sub
 
         ''' <summary>
@@ -603,6 +652,24 @@ thumbnail As ThumbnailType) As String
         Public ReadOnly Property Normal As String
             Get
                 Return Me.imageUrl.AbsoluteUri
+            End Get
+        End Property
+
+        ''' <summary>
+        ''' The Imgur identifier of the image (the file name of the direct url, without extension).
+        ''' </summary>
+        Public ReadOnly Property Id As String
+            Get
+                Return Path.GetFileNameWithoutExtension(Me.imageUrl.AbsolutePath)
+            End Get
+        End Property
+
+        ''' <summary>
+        ''' The url of the Imgur page of the image (the 'Share Link').
+        ''' </summary>
+        Public ReadOnly Property ShareLink As String
+            Get
+                Return $"https://imgur.com/{Me.Id}"
             End Get
         End Property
 
@@ -665,3 +732,4 @@ thumbnail As ThumbnailType) As String
     End Class
 
 End Namespace
+

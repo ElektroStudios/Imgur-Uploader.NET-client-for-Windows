@@ -1,4 +1,4 @@
-﻿
+
 #Region " Option Statements "
 
 Option Strict On
@@ -9,13 +9,14 @@ Option Infer Off
 
 #Region " Imports "
 
-Imports ImgurUploader.Tools
-Imports System.Threading.Tasks
 Imports CButtonLib
-Imports System.Threading
-Imports System.IO
+Imports ImgurUploader.Tools
+Imports ImgurUploader.UserInterface.CustomControls
 Imports System.Drawing.Imaging
-Imports System.Runtime.CompilerServices
+Imports System.IO
+Imports System.Runtime.InteropServices
+Imports System.Threading
+Imports System.Threading.Tasks
 
 #End Region
 
@@ -26,7 +27,7 @@ Namespace UserInterface
     ''' </summary>
     Public NotInheritable Class Main
 
-#Region " Objects "
+#Region " Private Fields "
 
         ''' <summary>
         ''' The <see cref="WindowSticker"/> instance that sticks the Form on the Desktop screen.
@@ -45,6 +46,41 @@ Namespace UserInterface
             ".BMP .JPG .JPEG .GIF .PNG .APNG .TIF .TIFF .PDF .XCF".Split(" "c)
 
         ''' <summary>
+        ''' The maximum width and height, in pixels, of the preview that is shown in the picture box.
+        ''' </summary>
+        Private Const PreviewMaxDimension As Integer = 1920
+
+        ''' <summary>
+        ''' The Windows message that notifies a change of system settings.
+        ''' </summary>
+        Private Const WmSettingChange As Integer = &H1A
+
+        ''' <summary>
+        ''' The image file that is selected and ready to be uploaded, or <see langword="Nothing"/> if there is none.
+        ''' </summary>
+        Private pendingFile As FileInfo
+
+        ''' <summary>
+        ''' The default image (logo) of the picture box. It is a shared resource, so it must never be disposed.
+        ''' </summary>
+        Private logoImage As Image
+
+        ''' <summary>
+        ''' The last successfully uploaded image, or <see langword="Nothing"/> if there is none.
+        ''' </summary>
+        Private currentImage As ImgurImage
+
+        ''' <summary>
+        ''' The persistent status-bar text (the one that is restored after a transient message).
+        ''' </summary>
+        Private statusText As String = "Ready"
+
+        ''' <summary>
+        ''' The persistent status-bar color (the one that is restored after a transient message).
+        ''' </summary>
+        Private statusColor As Color = Color.Gainsboro
+
+        ''' <summary>
         ''' The uploading background task.
         ''' </summary>
         Private uploadTask As Task
@@ -59,6 +95,21 @@ Namespace UserInterface
         ''' </summary>
         Private uploadTaskCT As CancellationToken
 
+        ''' <summary>
+        ''' The maximum file size, in bytes, that Imgur accepts for non-animated images (50 MB).
+        ''' </summary>
+        Private Const MaxImageFileSize As Long = 52428800L
+
+        ''' <summary>
+        ''' The maximum file size, in bytes, that Imgur accepts for animated images (200 MB).
+        ''' </summary>
+        Private Const MaxAnimatedFileSize As Long = 209715200L
+
+        ''' <summary>
+        ''' The url of the project repository.
+        ''' </summary>
+        Private Const RepositoryUrl As String = "https://github.com/ElektroStudios/Imgur-Uploader.NET-client-for-Windows"
+
 #End Region
 
 #Region " Constructors "
@@ -68,11 +119,56 @@ Namespace UserInterface
         ''' </summary>
         Public Sub New()
 
+            Dim english As Globalization.CultureInfo = Globalization.CultureInfo.GetCultureInfo("en-US")
+            Globalization.CultureInfo.DefaultThreadCurrentUICulture = english
+            Threading.Thread.CurrentThread.CurrentUICulture = english
+
             ' This call is required by the designer.
             Me.InitializeComponent()
 
+            Me.Text = $"{My.Application.Info.Title} {My.Application.Info.Version.Major}.{My.Application.Info.Version.Minor}"
+
+            ' Globe emoji (U+1F310) as a UTF-16 surrogate pair.
+            Me.ToolStripStatusLabel_GitHub.Text = ChrW(&HD83C) & ChrW(&HDF10) & " GitHub"
+
             ' Add any initialization after the InitializeComponent() call.
+            Me.logoImage = Me.PictureBox_Logo.Image
+            Me.InitializeSelectors()
+            Me.SetToolTips()
             Me.SetClientIds()
+
+        End Sub
+
+#End Region
+
+#Region " Overrides "
+
+        ''' <summary>
+        ''' Raises the HandleCreated event.
+        ''' The dark title bar must be applied here, because it has no effect when applied later.
+        ''' </summary>
+        ''' <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        Protected Overrides Sub OnHandleCreated(e As EventArgs)
+
+            MyBase.OnHandleCreated(e)
+            DarkTitleBar.ApplyCurrentTheme(Me.Handle)
+
+        End Sub
+
+        ''' <summary>
+        ''' Processes Windows messages.
+        ''' Re-applies the title bar theme when the user changes the Windows theme while the app is running.
+        ''' </summary>
+        ''' <param name="m">The Windows <see cref="Message"/> to process.</param>
+        Protected Overrides Sub WndProc(ByRef m As Message)
+
+            MyBase.WndProc(m)
+
+            If (m.Msg = WmSettingChange) AndAlso (m.LParam <> IntPtr.Zero) AndAlso
+               (Marshal.PtrToStringUni(m.LParam) = "ImmersiveColorSet") AndAlso Me.IsHandleCreated Then
+
+                DarkTitleBar.ApplyCurrentTheme(Me.Handle)
+            End If
 
         End Sub
 
@@ -91,7 +187,7 @@ Namespace UserInterface
             Me.MinimumSize = Me.Size
 
             If My.Application.CommandLineArgs.Count <> 0 Then
-                Me.LoadFile(New FileInfo(My.Application.CommandLineArgs.First))
+                Me.SelectFile(New FileInfo(My.Application.CommandLineArgs.First))
             End If
 
         End Sub
@@ -119,7 +215,7 @@ Namespace UserInterface
         Handles Me.DragDrop
 
             If e.Data.GetDataPresent(DataFormats.FileDrop) Then
-                Me.LoadFile(New FileInfo(DirectCast(e.Data.GetData(DataFormats.FileDrop), IEnumerable(Of String))(0)))
+                Me.SelectFile(New FileInfo(DirectCast(e.Data.GetData(DataFormats.FileDrop), String())(0)))
             End If
 
         End Sub
@@ -132,287 +228,128 @@ Namespace UserInterface
         Private Sub CButton_BrowseImage_ClickButtonArea(sender As Object, e As MouseEventArgs) _
         Handles CButton_BrowseImage.ClickButtonArea
 
-            If Me.OpenFileDialog_BrowseImage.ShowDialog() = Windows.Forms.DialogResult.OK Then
-                Me.LoadFile(New FileInfo(Me.OpenFileDialog_BrowseImage.FileName))
+            If Me.OpenFileDialog_BrowseImage.ShowDialog() = DialogResult.OK Then
+                Me.SelectFile(New FileInfo(Me.OpenFileDialog_BrowseImage.FileName))
             End If
+
+        End Sub
+
+        ''' <summary>
+        ''' Handles the ClickButtonArea event of the CButton_Upload control.
+        ''' </summary>
+        ''' <param name="sender">The source of the event.</param>
+        ''' <param name="e">The <see cref="MouseEventArgs"/> instance containing the event data.</param>
+        Private Sub CButton_Upload_ClickButtonArea(sender As Object, e As MouseEventArgs) _
+        Handles CButton_Upload.ClickButtonArea
+
+            Me.StartUpload()
 
         End Sub
 
         ''' <summary>
         ''' Handles the ClickButtonArea event of the CButton_Abort control.
+        ''' Requests the cancellation of the upload; the upload task restores the user interface when it finishes.
         ''' </summary>
-        ''' <param name="Sender">The source of the event.</param>
+        ''' <param name="sender">The source of the event.</param>
         ''' <param name="e">The <see cref="MouseEventArgs"/> instance containing the event data.</param>
         Private Sub CButton_Abort_ClickButtonArea(sender As Object, e As MouseEventArgs) _
         Handles CButton_Abort.ClickButtonArea
 
-            Me.uploadTaskCTSource.Cancel(True)
-            Me.uploadTask.Wait()
-            Me.uploadTask.Dispose()
-            Me.uploadTaskCTSource.Dispose()
-
-            Me.CButton_Abort.Hide()
-            Me.CButton_BrowseImage.Show()
-            Me.Panel_Urls.Enabled = False
-            Me.Enabled = True
-            Me.AllowDrop = True
+            ' Never block the UI thread waiting for the task: the task invokes the UI thread to finish its work.
+            Me.CButton_Abort.Enabled = False
+            Me.uploadTaskCTSource.Cancel()
 
         End Sub
 
         ''' <summary>
-        ''' Handles the EnabledChanged event of the Buttons Clipboard controls.
+        ''' Handles the SelectedIndexChanged event of both selectors.
+        ''' Refreshes the formatted result.
         ''' </summary>
         ''' <param name="sender">The source of the event.</param>
         ''' <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        Private Sub Buttons_Clip_EnabledChanged(sender As Object, e As EventArgs) _
-        Handles Button_Clip_Normal.EnabledChanged,
-                Button_Clip_HugeThumbnail.EnabledChanged,
-                Button_Clip_LargeThumbnail.EnabledChanged,
-                Button_Clip_MediumThumbnail.EnabledChanged,
-                Button_Clip_SmallThumbnail.EnabledChanged,
-                Button_Clip_BBCode_Normal.EnabledChanged,
-                Button_Clip_BBCode_Thumbnail.EnabledChanged,
-                Button_Clip_Markdown_Normal.EnabledChanged
+        Private Sub Selectors_SelectedIndexChanged(sender As Object, e As EventArgs) _
+        Handles Selector_Size.SelectedIndexChanged,
+                Selector_Format.SelectedIndexChanged
 
-            DirectCast(sender, Button).BackgroundImage = If(DirectCast(sender, Button).Enabled, My.Resources.Clipboard, My.Resources.ClipboardGray)
+            Me.UpdateResult()
 
         End Sub
 
         ''' <summary>
-        ''' Handles the Click event of the Button controls.
+        ''' Handles the MouseDown event of the TextBox_Result control.
+        ''' Selects all the text, so it can be copied manually.
         ''' </summary>
         ''' <param name="sender">The source of the event.</param>
-        ''' <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        Private Sub Buttons_Clip_Click(sender As Object, e As EventArgs) _
-        Handles Button_Clip_Normal.Click,
-                Button_Clip_HugeThumbnail.Click,
-                Button_Clip_LargeThumbnail.Click,
-                Button_Clip_MediumThumbnail.Click,
-                Button_Clip_SmallThumbnail.Click,
-                Button_Clip_BBCode_Normal.Click,
-                Button_Clip_BBCode_Thumbnail.Click,
-                Button_Clip_Markdown_Normal.Click
+        ''' <param name="e">The <see cref="MouseEventArgs"/> instance containing the event data.</param>
+        Private Sub TextBox_Result_MouseDown(sender As Object, e As MouseEventArgs) _
+        Handles TextBox_Result.MouseDown
 
-            Clipboard.SetText(DirectCast(Me.TableLayoutPanel1.Controls("TextBox_" & CStr(DirectCast(sender, Button).Tag)), TextBox).Text)
+            Me.TextBox_Result.SelectAll()
 
         End Sub
 
         ''' <summary>
-        ''' Handles the EnabledChanged event of the Buttons Url controls.
+        ''' Handles the MainAreaClick event of the Button_Copy control.
+        ''' Copies the formatted result to the clipboard.
         ''' </summary>
         ''' <param name="sender">The source of the event.</param>
         ''' <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        Private Sub Buttons_Url_EnabledChanged(sender As Object, e As EventArgs) _
-        Handles Button_Url_Normal.EnabledChanged,
-                Button_Url_HugeThumbnail.EnabledChanged,
-                Button_Url_LargeThumbnail.EnabledChanged,
-                Button_Url_MediumThumbnail.EnabledChanged,
-                Button_Url_SmallThumbnail.EnabledChanged
+        ''' <exception cref="InvalidOperationException">
+        ''' There is no result to copy.
+        ''' </exception>
+        Private Sub Button_Copy_MainAreaClick(sender As Object, e As EventArgs) _
+        Handles Button_Copy.MainAreaClick
 
-            DirectCast(sender, Button).BackgroundImage = If(DirectCast(sender, Button).Enabled, My.Resources.Go, My.Resources.Go_Gray)
-
-        End Sub
-
-        ''' <summary>
-        ''' Handles the Click event of the Buttons Url controls.
-        ''' </summary>
-        ''' <param name="sender">The source of the event.</param>
-        ''' <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        Private Sub Buttons_Url_Click(sender As Object, e As EventArgs) _
-        Handles Button_Url_Normal.Click,
-                Button_Url_HugeThumbnail.Click,
-                Button_Url_LargeThumbnail.Click,
-                Button_Url_MediumThumbnail.Click,
-                Button_Url_SmallThumbnail.Click
-
-            Dim tb As TextBox = DirectCast(Me.TableLayoutPanel1.Controls("TextBox_" & CStr(DirectCast(sender, Button).Tag)), TextBox)
-
-            If Not String.IsNullOrEmpty(tb.Text) Then
-                Process.Start(tb.Text)
+            If String.IsNullOrEmpty(Me.TextBox_Result.Text) Then
+                Throw New InvalidOperationException("There is no result to copy.")
             End If
 
+            Clipboard.SetText(Me.TextBox_Result.Text)
+            Me.SetStatus("Copied to clipboard.", Color.YellowGreen, transient:=True)
+
         End Sub
 
         ''' <summary>
-        ''' Handles the EnabledChanged event of the TextBox controls.
+        ''' Handles the MainAreaClick event of the Button_Open control.
+        ''' Opens the URL (direct URL or share link) in the default browser.
         ''' </summary>
         ''' <param name="sender">The source of the event.</param>
         ''' <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        Private Sub TextBoxes_EnabledChanged(sender As Object, e As EventArgs) _
-        Handles TextBox_Url_Normal.EnabledChanged,
-                TextBox_Url_SmallThumbnail.EnabledChanged,
-                TextBox_Url_MediumThumbnail.EnabledChanged,
-                TextBox_Url_LargeThumbnail.EnabledChanged,
-                TextBox_Url_HugeThumbnail.EnabledChanged,
-                TextBox_BBCode_Normal.EnabledChanged,
-                TextBox_BBCode_Thumbnail.EnabledChanged,
-                TextBox_Markdown_Normal.EnabledChanged
+        ''' <exception cref="InvalidOperationException">
+        ''' The selected format is not a URL, or there is no uploaded image.
+        ''' </exception>
+        Private Sub Button_Open_MainAreaClick(sender As Object, e As EventArgs) _
+        Handles Button_Open.MainAreaClick
 
-            Dim tb As TextBox = DirectCast(sender, TextBox)
-
-            If Not tb.Enabled Then
-                tb.Clear()
+            If (Me.currentImage Is Nothing) OrElse Not ImgurUrlFormatter.IsOpenable(Me.SelectedFormat) Then
+                Throw New InvalidOperationException("Only a URL of an uploaded image can be opened.")
             End If
 
+            Dim url As String = ImgurUrlFormatter.Format(Me.currentImage, Me.SelectedSize, Me.SelectedFormat)
+            Process.Start(New ProcessStartInfo(url) With {.UseShellExecute = True})
+
         End Sub
 
         ''' <summary>
-        ''' Handles the MouseDown and MouseMove events of the TextBox Urls controls.
+        ''' Handles the Tick event of the Timer_StatusRestore control.
+        ''' Restores the persistent status-bar message.
         ''' </summary>
         ''' <param name="sender">The source of the event.</param>
         ''' <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        Private Sub TextBox_Urls_MouseDown_MouseMove(sender As Object, e As EventArgs) _
-        Handles TextBox_Url_Normal.MouseDown,
-                TextBox_Url_SmallThumbnail.MouseDown,
-                TextBox_Url_MediumThumbnail.MouseDown,
-                TextBox_Url_LargeThumbnail.MouseDown,
-                TextBox_Url_HugeThumbnail.MouseDown,
-                TextBox_BBCode_Normal.MouseDown,
-                TextBox_BBCode_Thumbnail.MouseDown,
-                TextBox_Markdown_Normal.MouseDown,
-                TextBox_Url_Normal.MouseMove,
-                TextBox_Url_SmallThumbnail.MouseMove,
-                TextBox_Url_MediumThumbnail.MouseMove,
-                TextBox_Url_LargeThumbnail.MouseMove,
-                TextBox_Url_HugeThumbnail.MouseMove,
-                TextBox_BBCode_Normal.MouseMove,
-                TextBox_BBCode_Thumbnail.MouseMove,
-                TextBox_Markdown_Normal.MouseMove
+        Private Sub Timer_StatusRestore_Tick(sender As Object, e As EventArgs) _
+        Handles Timer_StatusRestore.Tick
 
-            DirectCast(sender, TextBox).SelectAll()
+            Me.Timer_StatusRestore.Stop()
+            Me.ToolStripStatusLabel_File.Text = Me.statusText
+            Me.ToolStripStatusLabel_File.ForeColor = Me.statusColor
 
         End Sub
-
-        ' ''' <summary>
-        ' ''' Handles the OnBadImageFormat event of the imgurClient.
-        ' ''' </summary>
-        ' ''' <param name="sender">The source of the event.</param>
-        ' ''' <param name="e">The <see cref="imgurAPI.imgurStatus"/> instance containing the event data.</param>
-        'Private Sub ImgurClient_OnBadImageFormat(ByVal sender As Object, ByVal e As ImgurAPI.ImgurStatus) _
-        'Handles imgurClient.OnBadImageFormat
-
-        '    Me.InvokeControl(Me, Sub(x As Form) x.Enabled = False)
-
-        '    MessageBox.Show(String.Format("Imgur service has thrown a 'Bad Image Format' error. (StatusCode: {0})", CStr(e)),
-        '                    Me.Text,
-        '                    MessageBoxButtons.OK, MessageBoxIcon.Error)
-
-        '    Me.InvokeControl(Me, Sub(x As Form) x.Enabled = True)
-
-        'End Sub
-
-        ' ''' <summary>
-        ' ''' Handles the OnAccessForbidden event of the imgurClient.
-        ' ''' </summary>
-        ' ''' <param name="sender">The source of the event.</param>
-        ' ''' <param name="e">The <see cref="imgurAPI.imgurStatus"/> instance containing the event data.</param>
-        'Private Sub ImgurClient_OnAccessForbidden(ByVal sender As Object, ByVal e As ImgurAPI.ImgurStatus) _
-        'Handles imgurClient.OnAccessForbidden
-
-        '    Me.InvokeControl(Me, Sub(x As Form) x.Enabled = False)
-
-        '    MessageBox.Show(String.Format("Imgur service has thrown an 'Access Forbidden' error. (StatusCode: {0})", CStr(e)),
-        '                    Me.Text,
-        '                    MessageBoxButtons.OK, MessageBoxIcon.Error)
-
-        '    Me.InvokeControl(Me, Sub(x As Form) x.Enabled = True)
-
-        'End Sub
-
-        ' ''' <summary>
-        ' ''' Handles the OnAuthorizationFailed event of the imgurClient.
-        ' ''' </summary>
-        ' ''' <param name="sender">The source of the event.</param>
-        ' ''' <param name="e">The <see cref="imgurAPI.imgurStatus"/> instance containing the event data.</param>
-        'Private Sub ImgurClient_OnAuthorizationFailed(ByVal sender As Object, ByVal e As ImgurAPI.ImgurStatus) _
-        'Handles imgurClient.OnAuthorizationFailed
-
-        '    Me.InvokeControl(Me, Sub(x As Form) x.Enabled = False)
-
-        '    MessageBox.Show(String.Format("Imgur service has thrown an 'Authorization Failed' error. (StatusCode: {0})", CStr(e)),
-        '                    Me.Text,
-        '                    MessageBoxButtons.OK, MessageBoxIcon.Error)
-
-        '    Me.InvokeControl(Me, Sub(x As Form) x.Enabled = True)
-
-        'End Sub
-
-        ' ''' <summary>
-        ' ''' Handles the OnInternalServerError event of the imgurClient.
-        ' ''' </summary>
-        ' ''' <param name="sender">The source of the event.</param>
-        ' ''' <param name="e">The <see cref="imgurAPI.imgurStatus"/> instance containing the event data.</param>
-        'Private Sub ImgurClient_OnInternalServerError(ByVal sender As Object, ByVal e As ImgurAPI.ImgurStatus) _
-        'Handles imgurClient.OnInternalServerError
-
-        '    Me.InvokeControl(Me, Sub(x As Form) x.Enabled = False)
-
-        '    MessageBox.Show(String.Format("Imgur service has thrown an Internal Server error. (StatusCode: {0})", CStr(e)),
-        '                    Me.Text,
-        '                    MessageBoxButtons.OK, MessageBoxIcon.Error)
-
-        '    Me.InvokeControl(Me, Sub(x As Form) x.Enabled = True)
-
-        'End Sub
-
-        ' ''' <summary>
-        ' ''' Handles the OnBadImageFormat event of the imgurClient.
-        ' ''' </summary>
-        ' ''' <param name="sender">The source of the event.</param>
-        ' ''' <param name="e">The <see cref="imgurAPI.imgurStatus"/> instance containing the event data.</param>
-        'Private Sub ImgurClient_OnPageIsNotFound(ByVal sender As Object, ByVal e As ImgurAPI.ImgurStatus) _
-        'Handles imgurClient.OnPageIsNotFound
-
-        '    Me.InvokeControl(Me, Sub(x As Form) x.Enabled = False)
-
-        '    MessageBox.Show(String.Format("Imgur service has thrown a 'Page Not Found' error. (StatusCode: {0})", CStr(e)),
-        '                    Me.Text,
-        '                    MessageBoxButtons.OK, MessageBoxIcon.Error)
-
-        '    Me.InvokeControl(Me, Sub(x As Form) x.Enabled = True)
-
-        'End Sub
-
-        ' ''' <summary>
-        ' ''' Handles the OnUploadRateLimitError event of the imgurClient.
-        ' ''' </summary>
-        ' ''' <param name="sender">The source of the event.</param>
-        ' ''' <param name="e">The <see cref="imgurAPI.imgurStatus"/> instance containing the event data.</param>
-        'Private Sub ImgurClient_OnUploadRateLimitError(ByVal sender As Object, ByVal e As ImgurAPI.ImgurStatus) _
-        'Handles imgurClient.OnUploadRateLimitError
-
-        '    Me.InvokeControl(Me, Sub(x As Form) x.Enabled = False)
-
-        '    MessageBox.Show(String.Format("Imgur service has thrown an 'Upload Rate-Limit' error. (StatusCode: {0})", CStr(e)),
-        '                    Me.Text,
-        '                    MessageBoxButtons.OK, MessageBoxIcon.Error)
-
-        '    Me.InvokeControl(Me, Sub(x As Form) x.Enabled = True)
-
-        'End Sub
-
-        ' ''' <summary>
-        ' ''' Handles the OnUnknownError event of the imgurClient.
-        ' ''' </summary>
-        ' ''' <param name="sender">The source of the event.</param>
-        ' ''' <param name="e">The <see cref="imgurAPI.imgurStatus"/> instance containing the event data.</param>
-        'Private Sub ImgurClient_OnUnknownError(ByVal sender As Object, ByVal e As ImgurAPI.ImgurStatus) _
-        'Handles imgurClient.OnUnknownError
-
-        '    Me.InvokeControl(Me, Sub(x As Form) x.Enabled = False)
-
-        '    MessageBox.Show("Imgur service has thrown an unknown error.", Me.Text,
-        '                    MessageBoxButtons.OK, MessageBoxIcon.Error)
-
-        '    Me.InvokeControl(Me, Sub(x As Form) x.Enabled = True)
-
-        'End Sub
 
         ''' <summary>
         ''' Handles the OnAsyncError event of the imgurClient.
         ''' </summary>
         ''' <param name="sender">The source of the event.</param>
-        ''' <param name="e">The <see cref="imgurAPI.imgurStatus"/> instance containing the event data.</param>
+        ''' <param name="e">The <see cref="Exception"/> instance containing the error.</param>
         Private Sub ImgurClient_OnAsyncError(sender As Object, e As Exception) _
         Handles ImgurClient.OnAsyncError
 
@@ -421,35 +358,115 @@ Namespace UserInterface
             MessageBox.Show(e.Message, Me.Text,
                             MessageBoxButtons.OK, MessageBoxIcon.Error)
 
-            Me.InvokeControl(Me.CButton_Abort, Sub(x As CButton) x.Hide())
-            Me.InvokeControl(Me.CButton_BrowseImage, Sub(x As CButton) x.Show())
-            Me.InvokeControl(Me, Sub(x As Form) x.Enabled = True)
+            Me.InvokeControl(Me, Sub(x As Form)
+                                     x.Enabled = True
+                                     Me.RestoreIdleState()
+                                 End Sub)
 
         End Sub
 
         ''' <summary>
-        ''' Handles the OnAsyncSuccess event of the imgurClient.
+        ''' Handles the Imgur status error events of the imgurClient.
+        ''' Informs the user about the reason of the failed upload.
         ''' </summary>
         ''' <param name="sender">The source of the event.</param>
-        ''' <param name="e">The <see cref="ImgurImage"/> instance containing the event data.</param>
-        Private Sub ImgurClient_OnAsyncSuccess(sender As Object, e As ImgurImage) _
-        Handles ImgurClient.OnAsyncSuccess
+        ''' <param name="e">The Imgur status.</param>
+        Private Sub ImgurClient_OnStatusError(sender As Object, e As ImgurAPI.ImgurStatus) _
+        Handles ImgurClient.OnAccessForbidden,
+                ImgurClient.OnAuthorizationFailed,
+                ImgurClient.OnBadImageFormat,
+                ImgurClient.OnInternalServerError,
+                ImgurClient.OnPageIsNotFound,
+                ImgurClient.OnUploadRateLimitError,
+                ImgurClient.OnUnknownError
 
-            Me.InvokeControl(Me.CButton_BrowseImage, Sub(x As CButton)
-                                                         x.Show()
-                                                     End Sub)
+            Me.SetStatus($"Imgur error: {e} ({CInt(e)})", Color.IndianRed)
 
-            Me.InvokeControl(Me.CButton_Abort, Sub(x As CButton)
-                                                   x.Hide()
-                                               End Sub)
+        End Sub
 
-            Me.InvokeControl(Me.Panel_Urls, Sub(x As Panel) x.Enabled = True)
+        ''' <summary>
+        ''' Handles the Click event of the ToolStripStatusLabel_GitHub control.
+        ''' Opens the project repository in the default browser.
+        ''' </summary>
+        ''' <param name="sender">The source of the event.</param>
+        ''' <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        Private Sub ToolStripStatusLabel_GitHub_Click(sender As Object, e As EventArgs) _
+        Handles ToolStripStatusLabel_GitHub.Click
+
+            Process.Start(New ProcessStartInfo(RepositoryUrl) With {.UseShellExecute = True})
 
         End Sub
 
 #End Region
 
 #Region " Methods "
+
+        ''' <summary>
+        ''' Gets the size currently selected in <see cref="Main.Selector_Size"/>.
+        ''' </summary>
+        Private ReadOnly Property SelectedSize As ImgurUrlSize
+            Get
+                Return CType(Me.Selector_Size.SelectedIndex, ImgurUrlSize)
+            End Get
+        End Property
+
+        ''' <summary>
+        ''' Gets the format currently selected in <see cref="Main.Selector_Format"/>.
+        ''' </summary>
+        Private ReadOnly Property SelectedFormat As ImgurUrlFormat
+            Get
+                Return CType(Me.Selector_Format.SelectedIndex, ImgurUrlFormat)
+            End Get
+        End Property
+
+        ''' <summary>
+        ''' Fills the size and format selectors.
+        ''' The item order must match the order of <see cref="ImgurUrlSize"/> and <see cref="ImgurUrlFormat"/>.
+        ''' </summary>
+        Private Sub InitializeSelectors()
+
+            Me.Selector_Size.SetItems(New String() {"Original", "Small Square", "Big Square", "Small Thumbnail", "Medium Thumbnail", "Large Thumbnail", "Huge Thumbnail"})
+            Me.Selector_Format.SetItems(New String() {"Direct URL", "Share Link", "CSS", "HTML", "HTML Embed", "BBCode", "Markdown", "Markdown (Image)"})
+            Me.UpdateResult()
+
+        End Sub
+
+        ''' <summary>
+        ''' Refreshes the result text box and the state of the copy and open buttons,
+        ''' according to the uploaded image and the selected size and format.
+        ''' This method must be called from the UI thread.
+        ''' </summary>
+        Private Sub UpdateResult()
+
+            Dim hasImage As Boolean = (Me.currentImage IsNot Nothing)
+
+            If hasImage Then
+                Me.TextBox_Result.Text = ImgurUrlFormatter.Format(Me.currentImage, Me.SelectedSize, Me.SelectedFormat)
+            Else
+                Me.TextBox_Result.Clear()
+            End If
+
+            ' Some formats (share link, HTML embed, official Markdown) do not depend on the size.
+            Me.Selector_Size.Enabled = ImgurUrlFormatter.UsesSize(Me.SelectedFormat)
+
+            Me.Button_Copy.Enabled = hasImage
+            Me.Button_Open.Enabled = hasImage AndAlso ImgurUrlFormatter.IsOpenable(Me.SelectedFormat)
+
+        End Sub
+
+        ''' <summary>
+        ''' Sets the tooltips of the controls.
+        ''' </summary>
+        Private Sub SetToolTips()
+
+            Me.ToolTip_Actions.SetToolTip(Me.CButton_BrowseImage, "Select an image file (you can also drag and drop it onto the window).")
+            Me.ToolTip_Actions.SetToolTip(Me.CButton_Upload, "Upload the selected image to Imgur.")
+            Me.ToolTip_Actions.SetToolTip(Me.Selector_Size, "Select which image size to use (not used by the Share Link, HTML Embed and Markdown formats).")
+            Me.ToolTip_Actions.SetToolTip(Me.Selector_Format, "Select the output format.")
+            Me.ToolTip_Actions.SetToolTip(Me.Button_Copy, "Copy the result to the clipboard.")
+            Me.ToolTip_Actions.SetToolTip(Me.Button_Open, "Open the URL in the default browser (Direct URL and Share Link formats only).")
+
+        End Sub
 
         ''' <summary>
         ''' Reads the INI file to retrieve and set the 'ClientId' and 'ClientSecret'.
@@ -463,7 +480,32 @@ Namespace UserInterface
                     Me.ImgurClient.ClientSecret = CStr(IniFileManager.Key.Get("ClientSecret", "", "[API]"))
 
                 Case False
-                    MessageBox.Show(String.Format("'{0}' file not found", Path.GetFileName(IniFileManager.FilePath)), Me.Text, MessageBoxButtons.OK, MessageBoxIcon.Error)
+                    Dim iniPath As String = IniFileManager.FilePath
+
+                    Dim message As String = String.Join(Environment.NewLine, New String() {
+                        $"The configuration file '{Path.GetFileName(iniPath)}' was not found.",
+                        "This is normal the first time you run the application: it needs your own Imgur API credentials in order to upload images.",
+                        String.Empty,
+                        "How to fix it:",
+                        String.Empty,
+                        "1. Register an application on Imgur to get a Client ID and a Client Secret:",
+                        "    https://apidocs.imgur.com/#register",
+                        String.Empty,
+                        "2. Create a text file with this exact name and location:",
+                        $"    {iniPath}",
+                        String.Empty,
+                        "3. Write these lines in it, replacing the values with your credentials:",
+                        String.Empty,
+                        "    [API]",
+                        "    ClientId=your client id",
+                        "    ClientSecret=your client secret",
+                        String.Empty,
+                        "4. Save the file and start the application again.",
+                        String.Empty,
+                        "The application will close now."
+                    })
+
+                    MessageBox.Show(message, Me.Text, MessageBoxButtons.OK, MessageBoxIcon.Information)
                     End
 
             End Select
@@ -491,205 +533,307 @@ Namespace UserInterface
         End Sub
 
         ''' <summary>
-        ''' Gets a thumbnail from the specified image.
+        ''' Sets the status-bar message. This method is thread-safe.
         ''' </summary>
-        ''' <param name="filePath">The image filepath.</param>
-        ''' <param name="width">The thumbnail width.</param>
-        ''' <param name="height">The thumbnail height.</param>
-        ''' <returns>The thumbnail.</returns>
-        Private Function GetThumbnail(filePath As String, width As Integer, height As Integer) As Image
+        ''' <param name="text">The message.</param>
+        ''' <param name="textColor">The text color.</param>
+        ''' <param name="transient">
+        ''' <see langword="True"/> to show the message for a few seconds and then restore the previous persistent message;
+        ''' <see langword="False"/> to make it the new persistent message.
+        ''' </param>
+        Private Sub SetStatus(text As String, textColor As Color, Optional transient As Boolean = False)
 
-            Using bmp As New Bitmap(filePath)
-                Return ImageTools.Resize(bmp, New Size(width, height), keepAspectRatio:=True)
-                ' Return bmp.GetThumbnailImage(width, height, Nothing, IntPtr.Zero)
-            End Using
+            Me.InvokeControl(Me.StatusStrip1,
+                             Sub(x As StatusStrip)
+                                 If Not transient Then
+                                     Me.statusText = text
+                                     Me.statusColor = textColor
+                                 End If
 
-        End Function
+                                 Me.ToolStripStatusLabel_File.Text = text
+                                 Me.ToolStripStatusLabel_File.ForeColor = textColor
+
+                                 Me.Timer_StatusRestore.Stop()
+                                 If transient Then
+                                     Me.Timer_StatusRestore.Start()
+                                 End If
+                             End Sub)
+
+        End Sub
 
         ''' <summary>
-        ''' Loads an image from commandline or Drag-Drop.
+        ''' Shows the specified image in the picture box and releases the previous preview.
         ''' </summary>
-        ''' <param name="ImageFile">The image file.</param>
-        Private Sub LoadFile(imageFile As FileInfo)
+        ''' <param name="image">The image to show.</param>
+        Private Sub SetPreview(image As Image)
 
-            Me.Enabled = False
+            Dim previous As Image = Me.PictureBox_Logo.Image
+            Me.PictureBox_Logo.Image = image
 
-            If File.Exists(imageFile.FullName) _
-            AndAlso Me.supportedFormats.Contains(imageFile.Extension.ToUpper) Then
-
-                Try
-                    Me.PictureBox_Logo.BackgroundImage = Me.GetThumbnail(imageFile.FullName,
-                                                         Me.PictureBox_Logo.Width,
-                                                         Me.PictureBox_Logo.Height)
-
-                Catch ex As Exception
-                    ' Do nothing with corrupted images, also because PDF is not an image.
-                    Me.PictureBox_Logo.BackgroundImage = My.Resources.Logo
-
-                End Try
-
-                Dim compressFlag As Boolean = False
-                Dim imgFormat As ImageFormat = Nothing
-                Dim targetsize As Long = 0
-
-                Select Case imageFile.Extension.ToLower
-
-                    Case "gif", "png"
-                        If imageFile.Length > 2097152L Then
-                            If MessageBox.Show("Maximum filesize for GIf and PNG is 2 MB." &
-                                            Environment.NewLine &
-                                            Environment.NewLine &
-                                            "Would you like to let ImgurUploader to compress and/or resize the image automatically?", Me.Text,
-                                            MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation) = Windows.Forms.DialogResult.OK Then
-
-                                compressFlag = True
-                                targetsize = 2097152L
-
-                                Select Case imageFile.Extension.ToLower
-
-                                    Case "gif"
-                                        imgFormat = ImageFormat.Gif
-
-                                    Case "png"
-                                        imgFormat = ImageFormat.Png
-
-                                End Select
-
-                            Else
-                                Exit Sub
-
-                            End If
-
-                        End If
-
-                    Case Else
-                        If imageFile.Length > 10485760L Then
-                            If MessageBox.Show("Maximum filesize for this format is 10 MB." &
-                                            Environment.NewLine &
-                                            Environment.NewLine &
-                                            "Would you like to let ImgurUploader to compress and/or resize the image automatically?", Me.Text,
-                                            MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation) = Windows.Forms.DialogResult.OK Then
-
-                                compressFlag = True
-                                targetsize = 10485760L
-
-                                Select Case imageFile.Extension.ToLower
-
-                                    Case "bmp"
-                                        imgFormat = ImageFormat.Bmp
-
-                                    Case "jpg", "jpeg"
-                                        imgFormat = ImageFormat.Jpeg
-
-                                    Case "tif", "tiff"
-                                        imgFormat = ImageFormat.Tiff
-
-                                    Case "apng", "pdf", "xcf"
-                                        MessageBox.Show("Image compression for this format is not supported.",
-                                                        Me.Text,
-                                                        MessageBoxButtons.OK, MessageBoxIcon.Error)
-                                        Exit Sub
-
-                                End Select
-
-                            Else
-                                Exit Sub
-
-                            End If
-
-                        End If
-
-                End Select
-
-                Dim compressedFile As String = Path.ChangeExtension(Path.GetTempFileName, imageFile.Extension)
-                If compressFlag Then
-
-                    WorkingForm.Show()
-
-                    Try
-                        ImageTools.CompressImage(imageFile.FullName, compressedFile, imgFormat, targetsize)
-
-                    Catch ex As Exception
-                        MessageBox.Show(ex.Message, Me.Text, MessageBoxButtons.OK, MessageBoxIcon.Error)
-                        Exit Sub
-
-                    Finally
-                        WorkingForm.Hide()
-                        Me.Enabled = True
-
-                    End Try
-
-                End If
-
-                Me.Enabled = True
-                Me.CButton_BrowseImage.Hide()
-                Me.CButton_Abort.Show()
-
-                Me.uploadTaskCTSource = New CancellationTokenSource
-                Me.uploadTaskCT = Me.uploadTaskCTSource.Token
-                Me.uploadTask = Task.Factory.StartNew(Sub()
-                                                          Me.UploadImage(If(Not compressFlag, imageFile.FullName, compressedFile), Me.uploadTaskCT)
-                                                      End Sub, Me.uploadTaskCT)
-
-            Else
-                MessageBox.Show("Unsupported file format.",
-                                Me.Text,
-                                MessageBoxButtons.OK, MessageBoxIcon.Error)
-                Me.Enabled = True
-
+            If (previous IsNot Nothing) AndAlso Not Object.ReferenceEquals(previous, Me.logoImage) Then
+                previous.Dispose()
             End If
 
         End Sub
 
         ''' <summary>
-        ''' Uploads the image to imgur and refreshes the textboxes content.
+        ''' Selects an image file (from the browse dialog, drag-drop or command line):
+        ''' shows its preview and enables the upload button. The image is not uploaded until the user confirms it.
+        ''' </summary>
+        ''' <param name="imageFile">The image file.</param>
+        Private Sub SelectFile(imageFile As FileInfo)
+
+            ' Files cannot be selected while an upload is in progress.
+            If Not Me.CButton_BrowseImage.Enabled Then
+                Return
+            End If
+
+            If Not File.Exists(imageFile.FullName) _
+            OrElse Not Me.supportedFormats.Contains(imageFile.Extension.ToUpperInvariant()) Then
+
+                MessageBox.Show("Unsupported file format.",
+                                Me.Text,
+                                MessageBoxButtons.OK, MessageBoxIcon.Error)
+                Return
+
+            End If
+
+            ' PDF and corrupted images have no preview: the logo is shown instead.
+            Dim preview As Bitmap = ImagePreviewLoader.TryLoad(imageFile.FullName, PreviewMaxDimension)
+            Me.SetPreview(If(preview IsNot Nothing, DirectCast(preview, Image), Me.logoImage))
+
+            Me.ShowFileInfo(imageFile)
+
+            Me.pendingFile = imageFile
+            Me.currentImage = Nothing
+            Me.UpdateResult()
+            Me.UpdateUploadButton()
+            Me.SetStatus($"Ready to upload: {imageFile.Name}", Color.Gainsboro)
+
+        End Sub
+
+        ''' <summary>
+        ''' Shows the name, extension, size and resolution of the selected image file.
+        ''' </summary>
+        ''' <param name="imageFile">The image file.</param>
+        Private Sub ShowFileInfo(imageFile As FileInfo)
+
+            Dim resolution As Size? = ImagePreviewLoader.TryGetResolution(imageFile.FullName)
+
+            Me.Label_FileName.Text = imageFile.Name
+            Me.Label_FileDetails.Text = ImageInfoFormatter.GetDetails(imageFile, resolution)
+            Me.ToolTip_Actions.SetToolTip(Me.Label_FileName, imageFile.FullName)
+
+        End Sub
+
+        ''' <summary>
+        ''' Enables the upload button only when there is a selected file.
+        ''' </summary>
+        Private Sub UpdateUploadButton()
+
+            Me.CButton_Upload.Enabled = (Me.pendingFile IsNot Nothing)
+
+        End Sub
+
+        ''' <summary>
+        ''' Uploads the selected file.
+        ''' </summary>
+        ''' 
+        ''' <remarks>
+        ''' Imgur limits (see https://help.imgur.com/hc/en-us/articles/26511665959579-What-files-can-I-upload-Is-there-a-size-limit):
+        ''' 50 MB for non-animated images and 200 MB for animated images (GIF). Below these limits Imgur itself converts
+        ''' big PNG files to JPEG and recompresses non-animated images, so no client-side compression is needed.
+        ''' Images over the limit are compressed (as JPEG) by the upload task, so the user interface never freezes.
+        ''' </remarks>
+        ''' 
+        ''' <exception cref="InvalidOperationException">
+        ''' There is no selected file to upload.
+        ''' </exception>
+        Private Sub StartUpload()
+
+            If Me.pendingFile Is Nothing Then
+                Throw New InvalidOperationException("There is no selected file to upload.")
+            End If
+
+            Dim imageFile As FileInfo = Me.pendingFile
+            imageFile.Refresh()
+
+            If Not imageFile.Exists Then
+                MessageBox.Show("The selected file no longer exists.", Me.Text, MessageBoxButtons.OK, MessageBoxIcon.Error)
+                Me.pendingFile = Nothing
+                Me.UpdateUploadButton()
+                Return
+            End If
+
+            Dim extension As String = imageFile.Extension.ToLowerInvariant()
+            Dim isAnimated As Boolean = (extension = ".gif") OrElse (extension = ".apng")
+            Dim maxFileSize As Long = If(isAnimated, MaxAnimatedFileSize, MaxImageFileSize)
+            Dim compress As Boolean = False
+
+            If imageFile.Length > maxFileSize Then
+
+                Dim limitText As String = $"The maximum file size accepted by Imgur for this format is {ByteSizeFormatter.Format(maxFileSize)}."
+
+                Select Case extension
+
+                    Case ".bmp", ".jpg", ".jpeg", ".png", ".tif", ".tiff"
+                        If MessageBox.Show($"{limitText}{Environment.NewLine}{Environment.NewLine}Would you like to let ImgurUploader to compress the image automatically? (it will be converted to JPEG)",
+                                           Me.Text,
+                                           MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation) <> DialogResult.OK Then
+                            Return
+                        End If
+                        compress = True
+
+                    Case ".gif", ".apng", ".pdf", ".xcf"
+                        MessageBox.Show($"{limitText}{Environment.NewLine}{Environment.NewLine}Automatic compression is not supported for this format.",
+                                        Me.Text,
+                                        MessageBoxButtons.OK, MessageBoxIcon.Error)
+                        Return
+
+                    Case Else
+                        Throw New InvalidOperationException($"Unexpected file extension: '{extension}'.")
+
+                End Select
+
+            End If
+
+            Me.currentImage = Nothing
+            Me.UpdateResult()
+            Me.CButton_BrowseImage.Enabled = False
+            Me.CButton_Upload.Hide()
+            Me.CButton_Abort.Enabled = True
+            Me.CButton_Abort.Show()
+
+            ' Release the resources of the previous (already finished) upload.
+            If (Me.uploadTask IsNot Nothing) AndAlso Me.uploadTask.IsCompleted Then
+                Me.uploadTask.Dispose()
+            End If
+            Me.uploadTaskCTSource?.Dispose()
+
+            Dim sourcePath As String = imageFile.FullName
+
+            Me.uploadTaskCTSource = New CancellationTokenSource
+            Me.uploadTaskCT = Me.uploadTaskCTSource.Token
+            Me.uploadTask = Task.Factory.StartNew(Sub()
+                                                      Me.UploadImage(sourcePath, compress, maxFileSize, Me.uploadTaskCT)
+                                                  End Sub, Me.uploadTaskCT)
+
+        End Sub
+
+        ''' <summary>
+        ''' Creates a unique temporary file path (the file itself is not created) with the specified extension.
+        ''' </summary>
+        ''' <param name="extension">The extension, including the dot.</param>
+        ''' <returns>The temporary file path.</returns>
+        Private Shared Function CreateTempFilePath(extension As String) As String
+
+            Dim tempFile As String = Path.GetTempFileName()
+
+            Try
+                Return Path.ChangeExtension(tempFile, extension)
+
+            Finally
+                File.Delete(tempFile)
+
+            End Try
+
+        End Function
+
+        ''' <summary>
+        ''' Compresses the image if needed, uploads it to imgur and shows the formatted result.
+        ''' This method runs in the upload task (not in the UI thread).
         ''' </summary>
         ''' <param name="filename">The filename.</param>
+        ''' <param name="compress"><see langword="True"/> to compress the image (as JPEG) before uploading it.</param>
+        ''' <param name="maxFileSize">The maximum file size, in bytes, of the compressed image.</param>
         ''' <param name="ct">The Task CancellationToken.</param>
-        Private Sub UploadImage(filename As String, ct As CancellationToken)
+        Private Sub UploadImage(filename As String, compress As Boolean, maxFileSize As Long, ct As CancellationToken)
 
             Me.InvokeControl(Me, Sub(x As Form) x.AllowDrop = False)
-            Me.InvokeControl(Me.Panel_Urls, Sub(x As Panel) x.Enabled = False)
 
-            Me.ToolStripStatusLabel_File.Text = String.Format("Uploading: {0}...", Path.GetFileName(filename))
+            Dim displayName As String = Path.GetFileName(filename)
+            Dim compressedFile As String = Nothing
 
-            ' Dim flag As Boolean = False
-            Dim urls As ImgurImage = Nothing
+            Try
+                Dim fileToUpload As String = filename
 
-            Using Me.uploadTaskCTSource.Token.Register(Sub() Me.ImgurClient.UploadImageAsyncCancel())
-                urls = Me.ImgurClient.UploadImageAsync(filename)
-            End Using
+                If compress Then
+                    Me.SetStatus($"Compressing: {displayName}...", Color.Gainsboro)
+                    compressedFile = CreateTempFilePath(".jpg")
+                    ImageTools.CompressImage(filename, compressedFile, ImageFormat.Jpeg, maxFileSize)
+                    fileToUpload = compressedFile
+                End If
 
-            If ct.IsCancellationRequested Then
-                Me.InvokeControl(Me.StatusStrip1, Sub() Me.ToolStripStatusLabel_File.Text = String.Format("Aborted: {0}", Path.GetFileName(filename)))
-                Exit Sub
+                Dim urls As ImgurImage = Nothing
 
-            ElseIf urls IsNot Nothing Then
+                If Not ct.IsCancellationRequested Then
+                    Me.SetStatus($"Uploading: {displayName}...", Color.Gainsboro)
 
-                Me.InvokeControl(Me.TextBox_Url_Normal, Sub(x As TextBox) x.Text = urls.Normal)
-                Me.InvokeControl(Me.TextBox_Url_SmallThumbnail, Sub(x As TextBox) x.Text = urls.SmallThumbnail)
-                Me.InvokeControl(Me.TextBox_Url_MediumThumbnail, Sub(x As TextBox) x.Text = urls.MediumThumbnail)
-                Me.InvokeControl(Me.TextBox_Url_LargeThumbnail, Sub(x As TextBox) x.Text = urls.LargeThumbnail)
-                Me.InvokeControl(Me.TextBox_Url_HugeThumbnail, Sub(x As TextBox) x.Text = urls.HugeThumbnail)
-                Me.InvokeControl(Me.TextBox_BBCode_Normal, Sub(x As TextBox) x.Text = $"[img]{urls.Normal}[/img]")
-                Me.InvokeControl(Me.TextBox_BBCode_Thumbnail, Sub(x As TextBox) x.Text = $"[url={urls.Normal}][img]{urls.LargeThumbnail}[/img][/url]")
-                Me.InvokeControl(Me.TextBox_Markdown_Normal, Sub(x As TextBox) x.Text = $"![IMAGE DESCRIPTION]({urls.Normal})")
+                    Using ct.Register(Sub() Me.ImgurClient.UploadImageAsyncCancel())
+                        urls = Me.ImgurClient.UploadImageAsync(fileToUpload)
+                    End Using
+                End If
 
-                Me.InvokeControl(Me.StatusStrip1, Sub()
-                                                      Me.ToolStripStatusLabel_File.Text = String.Format("Success: {0}",
-                                                                  Path.GetFileName(filename))
-                                                      Me.ToolStripStatusLabel_File.ForeColor = Color.Gainsboro
-                                                  End Sub)
+                If ct.IsCancellationRequested Then
+                    Me.SetStatus($"Aborted: {displayName}", Color.Gainsboro)
+                    Me.InvokeControl(Me, Sub(x As Form) Me.RestoreIdleState())
 
-            Else
+                ElseIf urls IsNot Nothing Then
+                    Me.InvokeControl(Me, Sub(x As Form) Me.ShowResults(urls))
+                    Me.SetStatus($"Success: {displayName}", Color.Gainsboro)
 
-                Me.InvokeControl(Me.StatusStrip1, Sub()
-                                                      Me.ToolStripStatusLabel_File.Text = String.Format("Error: {0}",
-                                                                  Path.GetFileName(filename))
-                                                      Me.ToolStripStatusLabel_File.ForeColor = Color.IndianRed
-                                                  End Sub)
+                ElseIf Me.statusColor <> Color.IndianRed Then
+                    ' (When Imgur reported a specific error, its message is already in the status bar.)
+                    Me.InvokeControl(Me, Sub(x As Form) Me.RestoreIdleState())
+                    Me.SetStatus($"Error: {displayName}", Color.IndianRed)
 
-            End If '/ urls IsNot Nothing
+                Else
+                    Me.InvokeControl(Me, Sub(x As Form) Me.RestoreIdleState())
+
+                End If
+
+            Catch ex As Exception
+                ' An exception must never escape from a background task: the UI would remain in the "uploading" state forever.
+                Me.SetStatus($"Error: {displayName}", Color.IndianRed)
+                Me.InvokeControl(Me, Sub(x As Form)
+                                         MessageBox.Show(x, ex.Message, x.Text, MessageBoxButtons.OK, MessageBoxIcon.Error)
+                                         Me.RestoreIdleState()
+                                     End Sub)
+
+            Finally
+                If (compressedFile IsNot Nothing) AndAlso File.Exists(compressedFile) Then
+                    File.Delete(compressedFile)
+                End If
+
+            End Try
+
+        End Sub
+
+        ''' <summary>
+        ''' Stores the result of a successful upload and refreshes the result controls.
+        ''' This method must be called from the UI thread.
+        ''' </summary>
+        ''' <param name="urls">The uploaded image urls.</param>
+        Private Sub ShowResults(urls As ImgurImage)
+
+            Me.currentImage = urls
+            Me.pendingFile = Nothing
+            Me.UpdateResult()
+            Me.RestoreIdleState()
+
+        End Sub
+
+        ''' <summary>
+        ''' Restores the browse and upload buttons and the drag-drop support after an upload has finished or has been aborted.
+        ''' This method must be called from the UI thread.
+        ''' </summary>
+        Private Sub RestoreIdleState()
+
+            Me.CButton_Abort.Hide()
+            Me.CButton_Upload.Show()
+            Me.CButton_BrowseImage.Enabled = True
+            Me.UpdateUploadButton()
+            Me.AllowDrop = True
 
         End Sub
 
