@@ -76,7 +76,7 @@ Uploading local images to Imgur usually requires opening a web browser, navigati
 ## 🖼️ Screenshots
 
 <p align="center">
-  <img src="Images/Screenshot%2001.png" alt="Screenshot 1" width="48%"> <img src="Images/Screenshot%2002.png" alt="Screenshot 2" width="48%">
+<img src="Images/Screenshot%2001.png" alt="Screenshot 1" width="48%">  <img src="Images/Screenshot%2002.png" alt="Screenshot 2" width="48%">
 </p>
 
 ## 📝 Requirements
