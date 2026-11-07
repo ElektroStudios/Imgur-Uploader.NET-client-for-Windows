@@ -121,7 +121,7 @@
     <Compile Include="Tools\UserAccountStore.vb" />
     <Compile Include="Tools\WindowSticker.vb" />
     <Compile Include="UserInterface\AuthorizationDialog.vb">
-      <SubType>Code</SubType>
+      <SubType>Form</SubType>
     </Compile>
     <Compile Include="UserInterface\CustomControls\DarkMenuRenderer.vb" />
     <Compile Include="UserInterface\CustomControls\DropDownActionButton.vb">
@@ -191,7 +191,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="Resources\Logo.png" />
   </ItemGroup>
   <ItemGroup>
@@ -202,6 +201,14 @@
     <None Include="Resources\ClipboardGray.png" />
     <Content Include="Resources\imgur.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="CButtonLib">
+      <Version>3.0.6</Version>
+    </PackageReference>
+    <PackageReference Include="System.Resources.Extensions">
+      <Version>10.0.9</Version>
+    </PackageReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -210,11 +217,4 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <Import Project="..\packages\System.ValueTuple.4.6.2\build\net471\System.ValueTuple.targets" Condition="Exists('..\packages\System.ValueTuple.4.6.2\build\net471\System.ValueTuple.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\System.ValueTuple.4.6.2\build\net471\System.ValueTuple.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.ValueTuple.4.6.2\build\net471\System.ValueTuple.targets'))" />
-  </Target>
 </Project>
