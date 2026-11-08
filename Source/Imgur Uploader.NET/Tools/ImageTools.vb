@@ -86,11 +86,9 @@ targetFileSize As Long)
 
         End Sub
 
-        ''' ----------------------------------------------------------------------------------------------------
         ''' <summary>
         ''' Resizes an <see cref="Drawing.Image"/>.
         ''' </summary>
-        ''' ----------------------------------------------------------------------------------------------------
         ''' <param name="size">
         ''' The new size.
         ''' </param>
@@ -98,17 +96,14 @@ targetFileSize As Long)
         ''' <param name="keepAspectRatio">
         ''' <see langword="True"/> to preserve original image's aspect ratio; <see langword="False"/> otherwise.
         ''' </param>
-        ''' ----------------------------------------------------------------------------------------------------
         ''' <returns>
         ''' The resized <see cref="Drawing.Image"/>.
         ''' </returns>
-        ''' ----------------------------------------------------------------------------------------------------
         ''' <exception cref="ArgumentException">
         ''' Value greater than zero is required.;width
         ''' or
         ''' Value greater than zero is required.;height
         ''' </exception>
-        ''' ----------------------------------------------------------------------------------------------------
         <DebuggerStepThrough>
         Public Shared Function Resize(img As Drawing.Image,
                                size As Drawing.Size,
