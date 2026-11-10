@@ -54,7 +54,7 @@ Namespace Tests
         <TestMethod>
         Public Sub ImgurImage_NullUri_Throws()
 
-            Assert.ThrowsException(Of ArgumentNullException)(Function() New ImgurImage(Nothing))
+            Assert.Throws(Of ArgumentNullException)(Function() New ImgurImage(Nothing))
 
         End Sub
 
@@ -109,7 +109,7 @@ Namespace Tests
 
             Dim client As New ImgurAPI()
 
-            Dim ex As Exception = Assert.ThrowsException(Of Exception)(Function() client.UploadImage("any.png"))
+            Dim ex As Exception = Assert.Throws(Of Exception)(Function() client.UploadImage("any.png"))
             StringAssert.Contains(ex.Message, "ClientId")
 
         End Sub
@@ -119,7 +119,7 @@ Namespace Tests
 
             Dim client As New ImgurAPI("clientId", String.Empty)
 
-            Dim ex As Exception = Assert.ThrowsException(Of Exception)(Function() client.UploadImage("any.png"))
+            Dim ex As Exception = Assert.Throws(Of Exception)(Function() client.UploadImage("any.png"))
             StringAssert.Contains(ex.Message, "ClientSecret")
 
         End Sub
@@ -129,7 +129,7 @@ Namespace Tests
 
             Dim client As New ImgurAPI()
 
-            Dim ex As Exception = Assert.ThrowsException(Of Exception)(Function() client.UploadImageAsync("any.png"))
+            Dim ex As Exception = Assert.Throws(Of Exception)(Function() client.UploadImageAsync("any.png"))
             StringAssert.Contains(ex.Message, "ClientId")
 
         End Sub

@@ -74,7 +74,7 @@ Namespace Tests
         <TestMethod>
         Public Sub ByteSize_Negative_Throws()
 
-            Assert.ThrowsException(Of ArgumentOutOfRangeException)(Function() ByteSizeFormatter.Format(-1L))
+            Assert.Throws(Of ArgumentOutOfRangeException)(Function() ByteSizeFormatter.Format(-1L))
 
         End Sub
 
@@ -112,7 +112,7 @@ Namespace Tests
         <TestMethod>
         Public Sub Details_NullFile_Throws()
 
-            Assert.ThrowsException(Of ArgumentNullException)(Function() ImageInfoFormatter.GetDetails(Nothing, Nothing))
+            Assert.Throws(Of ArgumentNullException)(Function() ImageInfoFormatter.GetDetails(Nothing, Nothing))
 
         End Sub
 
@@ -149,7 +149,7 @@ Namespace Tests
         <TestMethod>
         Public Sub TryGetResolution_EmptyPath_Throws()
 
-            Assert.ThrowsException(Of ArgumentException)(Function() ImagePreviewLoader.TryGetResolution(String.Empty))
+            Assert.Throws(Of ArgumentException)(Function() ImagePreviewLoader.TryGetResolution(String.Empty))
 
         End Sub
 

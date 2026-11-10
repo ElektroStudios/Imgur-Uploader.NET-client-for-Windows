@@ -88,29 +88,29 @@ Namespace Tests
         <TestMethod>
         Public Sub Tokens_Parse_WithoutAccessToken_Throws()
 
-            Assert.ThrowsException(Of FormatException)(Function() ImgurTokens.Parse("{""refresh_token"":""ref456""}"))
-            Assert.ThrowsException(Of FormatException)(Function() ImgurTokens.Parse("{""access_token"":""   ""}"))
-            Assert.ThrowsException(Of FormatException)(Function() ImgurTokens.Parse("{""access_token"":123}"))
+            Assert.Throws(Of FormatException)(Function() ImgurTokens.Parse("{""refresh_token"":""ref456""}"))
+            Assert.Throws(Of FormatException)(Function() ImgurTokens.Parse("{""access_token"":""   ""}"))
+            Assert.Throws(Of FormatException)(Function() ImgurTokens.Parse("{""access_token"":123}"))
 
         End Sub
 
         <TestMethod>
         Public Sub Tokens_Parse_EmptyOrInvalidJson_Throws()
 
-            Assert.ThrowsException(Of FormatException)(Function() ImgurTokens.Parse(Nothing))
-            Assert.ThrowsException(Of FormatException)(Function() ImgurTokens.Parse(String.Empty))
-            Assert.ThrowsException(Of FormatException)(Function() ImgurTokens.Parse("   "))
-            Assert.ThrowsException(Of FormatException)(Function() ImgurTokens.Parse("not json at all"))
-            Assert.ThrowsException(Of FormatException)(Function() ImgurTokens.Parse("{""access_token"":"))
-            Assert.ThrowsException(Of FormatException)(Function() ImgurTokens.Parse("[1,2,3]"))
+            Assert.Throws(Of FormatException)(Function() ImgurTokens.Parse(Nothing))
+            Assert.Throws(Of FormatException)(Function() ImgurTokens.Parse(String.Empty))
+            Assert.Throws(Of FormatException)(Function() ImgurTokens.Parse("   "))
+            Assert.Throws(Of FormatException)(Function() ImgurTokens.Parse("not json at all"))
+            Assert.Throws(Of FormatException)(Function() ImgurTokens.Parse("{""access_token"":"))
+            Assert.Throws(Of FormatException)(Function() ImgurTokens.Parse("[1,2,3]"))
 
         End Sub
 
         <TestMethod>
         Public Sub Tokens_Constructor_EmptyAccessToken_Throws()
 
-            Assert.ThrowsException(Of ArgumentException)(Function() New ImgurTokens(String.Empty, "r", 10, "u"))
-            Assert.ThrowsException(Of ArgumentException)(Function() New ImgurTokens(Nothing, "r", 10, "u"))
+            Assert.Throws(Of ArgumentException)(Function() New ImgurTokens(String.Empty, "r", 10, "u"))
+            Assert.Throws(Of ArgumentException)(Function() New ImgurTokens(Nothing, "r", 10, "u"))
 
         End Sub
 
@@ -189,8 +189,8 @@ Namespace Tests
         <TestMethod>
         Public Sub Api_GetAuthorizationUrl_EmptyClientId_Throws()
 
-            Assert.ThrowsException(Of ArgumentException)(Function() ImgurAPI.GetAuthorizationUrl(Nothing))
-            Assert.ThrowsException(Of ArgumentException)(Function() ImgurAPI.GetAuthorizationUrl("   "))
+            Assert.Throws(Of ArgumentException)(Function() ImgurAPI.GetAuthorizationUrl(Nothing))
+            Assert.Throws(Of ArgumentException)(Function() ImgurAPI.GetAuthorizationUrl("   "))
 
         End Sub
 
@@ -221,10 +221,10 @@ Namespace Tests
         <TestMethod>
         Public Sub Api_GetAuthorizationHeaderValue_MissingCredential_Throws()
 
-            Assert.ThrowsException(Of ArgumentException)(
+            Assert.Throws(Of ArgumentException)(
                 Function() ImgurAPI.GetAuthorizationHeaderValue(ImgurUploadMode.Anonymous, String.Empty, "tok"))
 
-            Assert.ThrowsException(Of ArgumentException)(
+            Assert.Throws(Of ArgumentException)(
                 Function() ImgurAPI.GetAuthorizationHeaderValue(ImgurUploadMode.Account, "abc", String.Empty))
 
         End Sub
@@ -232,7 +232,7 @@ Namespace Tests
         <TestMethod>
         Public Sub Api_GetAuthorizationHeaderValue_InvalidMode_Throws()
 
-            Assert.ThrowsException(Of ArgumentOutOfRangeException)(
+            Assert.Throws(Of ArgumentOutOfRangeException)(
                 Function() ImgurAPI.GetAuthorizationHeaderValue(CType(99, ImgurUploadMode), "abc", "tok"))
 
         End Sub
@@ -322,7 +322,7 @@ Namespace Tests
             Dim client As New ImgurAPI("clientId", "clientSecret")
 
             Dim ex As InvalidOperationException =
-                Assert.ThrowsException(Of InvalidOperationException)(Function() client.UploadImage("any.png", ImgurUploadMode.Account))
+                Assert.Throws(Of InvalidOperationException)(Function() client.UploadImage("any.png", ImgurUploadMode.Account))
 
             StringAssert.Contains(ex.Message, "not authorized")
 
@@ -334,7 +334,7 @@ Namespace Tests
             Dim client As New ImgurAPI("clientId", "clientSecret")
 
             Dim ex As InvalidOperationException =
-                Assert.ThrowsException(Of InvalidOperationException)(Function() client.UploadImageAsync("any.png", ImgurUploadMode.Account))
+                Assert.Throws(Of InvalidOperationException)(Function() client.UploadImageAsync("any.png", ImgurUploadMode.Account))
 
             StringAssert.Contains(ex.Message, "not authorized")
 
@@ -346,7 +346,7 @@ Namespace Tests
             Dim client As New ImgurAPI("clientId", String.Empty)
             client.RestoreAccount("ref456", "elektro")
 
-            Dim ex As Exception = Assert.ThrowsException(Of Exception)(Function() client.UploadImage("any.png", ImgurUploadMode.Account))
+            Dim ex As Exception = Assert.Throws(Of Exception)(Function() client.UploadImage("any.png", ImgurUploadMode.Account))
 
             StringAssert.Contains(ex.Message, "ClientSecret")
 
@@ -357,8 +357,8 @@ Namespace Tests
 
             Dim client As New ImgurAPI("clientId", "clientSecret")
 
-            Assert.ThrowsException(Of ArgumentException)(Sub() client.AuthorizeWithPin(Nothing))
-            Assert.ThrowsException(Of ArgumentException)(Sub() client.AuthorizeWithPin("   "))
+            Assert.Throws(Of ArgumentException)(Sub() client.AuthorizeWithPin(Nothing))
+            Assert.Throws(Of ArgumentException)(Sub() client.AuthorizeWithPin("   "))
 
         End Sub
 
@@ -368,8 +368,8 @@ Namespace Tests
             Dim withoutId As New ImgurAPI(String.Empty, "clientSecret")
             Dim withoutSecret As New ImgurAPI("clientId", String.Empty)
 
-            Dim ex1 As InvalidOperationException = Assert.ThrowsException(Of InvalidOperationException)(Sub() withoutId.AuthorizeWithPin("1234"))
-            Dim ex2 As InvalidOperationException = Assert.ThrowsException(Of InvalidOperationException)(Sub() withoutSecret.AuthorizeWithPin("1234"))
+            Dim ex1 As InvalidOperationException = Assert.Throws(Of InvalidOperationException)(Sub() withoutId.AuthorizeWithPin("1234"))
+            Dim ex2 As InvalidOperationException = Assert.Throws(Of InvalidOperationException)(Sub() withoutSecret.AuthorizeWithPin("1234"))
 
             StringAssert.Contains(ex1.Message, "ClientId")
             StringAssert.Contains(ex2.Message, "ClientSecret")
@@ -381,7 +381,7 @@ Namespace Tests
 
             Dim client As New ImgurAPI("clientId", "clientSecret")
 
-            Dim ex As InvalidOperationException = Assert.ThrowsException(Of InvalidOperationException)(Sub() client.RefreshAccessToken())
+            Dim ex As InvalidOperationException = Assert.Throws(Of InvalidOperationException)(Sub() client.RefreshAccessToken())
 
             StringAssert.Contains(ex.Message, "not authorized")
 

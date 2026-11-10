@@ -56,14 +56,14 @@ Namespace Tests
         <TestMethod>
         Public Sub GetUrl_NullImage_Throws()
 
-            Assert.ThrowsException(Of ArgumentNullException)(Function() ImgurUrlFormatter.GetUrl(Nothing, ImgurUrlSize.Normal))
+            Assert.Throws(Of ArgumentNullException)(Function() ImgurUrlFormatter.GetUrl(Nothing, ImgurUrlSize.Normal))
 
         End Sub
 
         <TestMethod>
         Public Sub GetUrl_InvalidSize_Throws()
 
-            Assert.ThrowsException(Of InvalidEnumArgumentException)(Function() ImgurUrlFormatter.GetUrl(CreateImage(), CType(99, ImgurUrlSize)))
+            Assert.Throws(Of InvalidEnumArgumentException)(Function() ImgurUrlFormatter.GetUrl(CreateImage(), CType(99, ImgurUrlSize)))
 
         End Sub
 
@@ -193,21 +193,21 @@ Namespace Tests
         <TestMethod>
         Public Sub Format_NullImage_Throws()
 
-            Assert.ThrowsException(Of ArgumentNullException)(Function() ImgurUrlFormatter.Format(Nothing, ImgurUrlSize.Normal, ImgurUrlFormat.DirectUrl))
+            Assert.Throws(Of ArgumentNullException)(Function() ImgurUrlFormatter.Format(Nothing, ImgurUrlSize.Normal, ImgurUrlFormat.DirectUrl))
 
         End Sub
 
         <TestMethod>
         Public Sub Format_InvalidFormat_Throws()
 
-            Assert.ThrowsException(Of InvalidEnumArgumentException)(Function() Fmt(ImgurUrlSize.Normal, CType(99, ImgurUrlFormat)))
+            Assert.Throws(Of InvalidEnumArgumentException)(Function() Fmt(ImgurUrlSize.Normal, CType(99, ImgurUrlFormat)))
 
         End Sub
 
         <TestMethod>
         Public Sub Format_InvalidSize_Throws()
 
-            Assert.ThrowsException(Of InvalidEnumArgumentException)(Function() Fmt(CType(99, ImgurUrlSize), ImgurUrlFormat.DirectUrl))
+            Assert.Throws(Of InvalidEnumArgumentException)(Function() Fmt(CType(99, ImgurUrlSize), ImgurUrlFormat.DirectUrl))
 
         End Sub
 

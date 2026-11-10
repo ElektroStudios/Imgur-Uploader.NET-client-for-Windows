@@ -81,7 +81,7 @@ Namespace Tests
 
             Dim selector As New DropDownSelector()
 
-            Assert.ThrowsException(Of ArgumentNullException)(Sub() selector.SetItems(Nothing))
+            Assert.Throws(Of ArgumentNullException)(Sub() selector.SetItems(Nothing))
 
         End Sub
 
@@ -105,8 +105,8 @@ Namespace Tests
 
             Dim selector As DropDownSelector = CreateSelector()
 
-            Assert.ThrowsException(Of ArgumentOutOfRangeException)(Sub() selector.SelectedIndex = 5)
-            Assert.ThrowsException(Of ArgumentOutOfRangeException)(Sub() selector.SelectedIndex = -2)
+            Assert.Throws(Of ArgumentOutOfRangeException)(Sub() selector.SelectedIndex = 5)
+            Assert.Throws(Of ArgumentOutOfRangeException)(Sub() selector.SelectedIndex = -2)
 
         End Sub
 
@@ -326,7 +326,7 @@ Namespace Tests
 
             Dim button As New DropDownActionButton()
 
-            Dim ex As TargetInvocationException = Assert.ThrowsException(Of TargetInvocationException)(
+            Dim ex As TargetInvocationException = Assert.Throws(Of TargetInvocationException)(
                 Sub() GetType(DropDownActionButton).GetMethod("OnKeyDown", NonPublicInstance).Invoke(button, New Object() {New KeyEventArgs(Keys.F4)}))
 
             Assert.IsInstanceOfType(ex.InnerException, GetType(InvalidOperationException))
@@ -362,8 +362,8 @@ Namespace Tests
         <TestMethod>
         Public Sub DarkTitleBar_ZeroHandle_Throws()
 
-            Assert.ThrowsException(Of ArgumentException)(Function() DarkTitleBar.SetDarkTitleBar(IntPtr.Zero, True))
-            Assert.ThrowsException(Of ArgumentException)(Function() DarkTitleBar.ApplyCurrentTheme(IntPtr.Zero))
+            Assert.Throws(Of ArgumentException)(Function() DarkTitleBar.SetDarkTitleBar(IntPtr.Zero, True))
+            Assert.Throws(Of ArgumentException)(Function() DarkTitleBar.ApplyCurrentTheme(IntPtr.Zero))
 
         End Sub
 

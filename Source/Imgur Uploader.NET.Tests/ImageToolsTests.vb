@@ -122,7 +122,7 @@ Namespace Tests
         Public Sub Resize_NonPositiveWidth_Throws()
 
             Using source As Bitmap = CreateSolidBitmap(10, 10, Color.Red, PixelFormat.Format24bppRgb)
-                Assert.ThrowsException(Of ArgumentException)(Function() ImageTools.Resize(source, New Size(0, 10), False))
+                Assert.Throws(Of ArgumentException)(Function() ImageTools.Resize(source, New Size(0, 10), False))
             End Using
 
         End Sub
@@ -131,7 +131,7 @@ Namespace Tests
         Public Sub Resize_NonPositiveHeight_Throws()
 
             Using source As Bitmap = CreateSolidBitmap(10, 10, Color.Red, PixelFormat.Format24bppRgb)
-                Assert.ThrowsException(Of ArgumentException)(Function() ImageTools.Resize(source, New Size(10, 0), False))
+                Assert.Throws(Of ArgumentException)(Function() ImageTools.Resize(source, New Size(10, 0), False))
             End Using
 
         End Sub
@@ -207,9 +207,9 @@ Namespace Tests
         <TestMethod>
         Public Sub GetScaledSize_InvalidArguments_Throw()
 
-            Assert.ThrowsException(Of ArgumentOutOfRangeException)(Function() ImagePreviewLoader.GetScaledSize(0, 10, 10))
-            Assert.ThrowsException(Of ArgumentOutOfRangeException)(Function() ImagePreviewLoader.GetScaledSize(10, 0, 10))
-            Assert.ThrowsException(Of ArgumentOutOfRangeException)(Function() ImagePreviewLoader.GetScaledSize(10, 10, 0))
+            Assert.Throws(Of ArgumentOutOfRangeException)(Function() ImagePreviewLoader.GetScaledSize(0, 10, 10))
+            Assert.Throws(Of ArgumentOutOfRangeException)(Function() ImagePreviewLoader.GetScaledSize(10, 0, 10))
+            Assert.Throws(Of ArgumentOutOfRangeException)(Function() ImagePreviewLoader.GetScaledSize(10, 10, 0))
 
         End Sub
 
@@ -270,8 +270,8 @@ Namespace Tests
         <TestMethod>
         Public Sub TryLoad_InvalidArguments_Throw()
 
-            Assert.ThrowsException(Of ArgumentException)(Function() ImagePreviewLoader.TryLoad(String.Empty, 100))
-            Assert.ThrowsException(Of ArgumentOutOfRangeException)(Function() ImagePreviewLoader.TryLoad("any.png", 0))
+            Assert.Throws(Of ArgumentException)(Function() ImagePreviewLoader.TryLoad(String.Empty, 100))
+            Assert.Throws(Of ArgumentOutOfRangeException)(Function() ImagePreviewLoader.TryLoad("any.png", 0))
 
         End Sub
 

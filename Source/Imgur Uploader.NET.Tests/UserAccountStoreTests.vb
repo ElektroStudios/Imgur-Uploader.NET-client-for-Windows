@@ -161,9 +161,9 @@ Namespace Tests
         <TestMethod>
         Public Sub SaveAccount_EmptyToken_Throws()
 
-            Assert.ThrowsException(Of ArgumentException)(Function() UserAccountStore.SaveAccount(String.Empty, "elektro"))
-            Assert.ThrowsException(Of ArgumentException)(Function() UserAccountStore.SaveAccount("   ", "elektro"))
-            Assert.ThrowsException(Of ArgumentException)(Function() UserAccountStore.SaveAccount(Nothing, "elektro"))
+            Assert.Throws(Of ArgumentException)(Function() UserAccountStore.SaveAccount(String.Empty, "elektro"))
+            Assert.Throws(Of ArgumentException)(Function() UserAccountStore.SaveAccount("   ", "elektro"))
+            Assert.Throws(Of ArgumentException)(Function() UserAccountStore.SaveAccount(Nothing, "elektro"))
 
         End Sub
 

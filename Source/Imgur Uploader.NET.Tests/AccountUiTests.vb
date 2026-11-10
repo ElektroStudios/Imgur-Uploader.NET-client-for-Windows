@@ -93,9 +93,9 @@ Namespace Tests
         Public Sub Button_ArrowAreaWidth_TooSmall_Throws()
 
             Using button As New DropDownActionButton()
-                Assert.ThrowsException(Of ArgumentOutOfRangeException)(Sub() button.ArrowAreaWidth = 11)
-                Assert.ThrowsException(Of ArgumentOutOfRangeException)(Sub() button.ArrowAreaWidth = 0)
-                Assert.ThrowsException(Of ArgumentOutOfRangeException)(Sub() button.ArrowAreaWidth = -40)
+                Assert.Throws(Of ArgumentOutOfRangeException)(Sub() button.ArrowAreaWidth = 11)
+                Assert.Throws(Of ArgumentOutOfRangeException)(Sub() button.ArrowAreaWidth = 0)
+                Assert.Throws(Of ArgumentOutOfRangeException)(Sub() button.ArrowAreaWidth = -40)
                 Assert.AreEqual(26, button.ArrowAreaWidth)
             End Using
 
@@ -237,7 +237,7 @@ Namespace Tests
         <TestMethod>
         Public Sub Dialog_NullClient_Throws()
 
-            Assert.ThrowsException(Of ArgumentNullException)(Function() New AuthorizationDialog(Nothing))
+            Assert.Throws(Of ArgumentNullException)(Function() New AuthorizationDialog(Nothing))
 
         End Sub
 
@@ -246,7 +246,7 @@ Namespace Tests
 
             Dim client As New ImgurAPI(String.Empty, "clientSecret")
 
-            Assert.ThrowsException(Of ArgumentException)(Function() New AuthorizationDialog(client))
+            Assert.Throws(Of ArgumentException)(Function() New AuthorizationDialog(client))
 
         End Sub
 
