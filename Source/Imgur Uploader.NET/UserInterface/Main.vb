@@ -1014,15 +1014,8 @@ Namespace UserInterface
         ''' <returns>The temporary file path.</returns>
         Private Shared Function CreateTempFilePath(extension As String) As String
 
-            Dim tempFile As String = Path.GetTempFileName()
-
-            Try
-                Return Path.ChangeExtension(tempFile, extension)
-
-            Finally
-                File.Delete(tempFile)
-
-            End Try
+            Dim fileName As String = Path.ChangeExtension(Path.GetRandomFileName(), extension)
+            Return Path.Combine(Path.GetTempPath(), fileName)
 
         End Function
 
@@ -1102,8 +1095,19 @@ Namespace UserInterface
                                      End Sub)
 
             Finally
-                If (compressedFile IsNot Nothing) AndAlso File.Exists(compressedFile) Then
-                    File.Delete(compressedFile)
+                If compressedFile IsNot Nothing Then
+                    Try
+                        File.Delete(compressedFile)
+
+                    Catch ex As IOException
+                        ' The file is still in use (e.g. by the HTTP client after a cancellation, or by an antivirus scan). 
+                        ' It is just an orphaned temporary file; it must not break the UI state.
+                        Debug.WriteLine($"Could not delete temporary file '{compressedFile}': {ex.Message}")
+
+                    Catch ex As UnauthorizedAccessException
+                        Debug.WriteLine($"Could not delete temporary file '{compressedFile}': {ex.Message}")
+
+                    End Try
                 End If
 
             End Try
